@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { View, Text, TextInput, Button, Image, ImageBackground, StyleSheet, useWindowDimensions,Dimensions  } from 'react-native';
 import { useRouter } from 'expo-router';
-import { validarCredenciales } from './src/validacion';
+import { validarCredenciales } from '../src/validacion';
 
 class BlackBox {
   private usuario: string;

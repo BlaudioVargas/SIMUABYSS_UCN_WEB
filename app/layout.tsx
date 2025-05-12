@@ -2,7 +2,11 @@ import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { HistorialMenu, ListadoPacientesMenu, FichaMedicaActivaMenu } from './menu/menu_web';
+import HistorialMenu from './screens/HistorialMenu';
+import { ListadoPacientesMenu } from '@/components/ListadoPacientesMenu';
+import FichaMedicaActivaMenu  from './screens/FichaMedicaActivaMenu';
+
+
 
 const Pantalla = () => {
   const router = useRouter();
@@ -82,7 +86,7 @@ const Pantalla = () => {
 
       {/* Panel Derecho */}
       <View style={{ flex: 1, backgroundColor: '#87CEEB', padding: 20 }}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
           {ComponenteActivo ? React.createElement(ComponenteActivo) : <Text>Seleccione una opción</Text>}
         </ScrollView>
       </View>
