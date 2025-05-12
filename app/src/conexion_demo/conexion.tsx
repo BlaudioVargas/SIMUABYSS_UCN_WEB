@@ -89,7 +89,7 @@ let  horarios = [
   { usuario: "paula.vera@alumnos.ucn.cl", departamento: "g6", bloque: "C", sala: 1004, dia: "lunes", asignatura: "Ciencias" }
 ];
 
-export function validarCredencialesOffline(usuario, clave) {
+export function validarCredencialesOffline(usuario: string, clave: string) {
   const usuarioEncontrado = usuariosPredeterminados.find(u => u.usuario === usuario);
 
   if (!usuarioEncontrado) return 2; // Usuario incorrecto
@@ -98,43 +98,67 @@ export function validarCredencialesOffline(usuario, clave) {
   return 1; // Credenciales correctas, el usuario es el correcto
 }
 
-export function buscarHorariosPorUsuarioOffline(usuario) {
-  return horarios.filter(h => h.usuario === usuario);
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+type CampoMedico = {
+  nombre: string;
+  valor: string;
+  tipo: string;
+  seccion: string;
+  obligatorio: boolean;
+  };
+  
+  const documentosMedicos: CampoMedico[][] = [
+  // Documento 1
+  [
+  { nombre: "ID Persona", valor: "123456", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "N° de Historia", valor: "78910", tipo: "Numérico", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Documento (RUT)", valor: "12.345.678-9", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Nombres", valor: "Juan", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Apellido Paterno", valor: "Pérez", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Apellido Materno", valor: "Gutiérrez", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Fecha de Nacimiento", valor: "1985-03-15", tipo: "Fecha", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Edad", valor: "40", tipo: "Numérico", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Sexo", valor: "Varón", tipo: "Selección(Varón/Mujer)", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Profesional Asignado", valor: "Dr. Alfredo González", tipo: "Selección", seccion: "Datos Administrativos", obligatorio: true },
+  { nombre: "Centro", valor: "CESFAM Central", tipo: "Selección", seccion: "Centro", obligatorio: true },
+  { nombre: "Fecha de Inscripción", valor: "2022-10-01", tipo: "Fecha", seccion: "Datos Administrativos", obligatorio: true },
+  ],
+  // Documento 2
+  [
+  { nombre: "ID Persona", valor: "789123", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "N° de Historia", valor: "11223", tipo: "Numérico", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Documento (RUT)", valor: "98.765.432-1", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Nombres", valor: "María", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Apellido Paterno", valor: "Fernández", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Apellido Materno", valor: "López", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Fecha de Nacimiento", valor: "1990-07-22", tipo: "Fecha", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Edad", valor: "34", tipo: "Numérico", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Sexo", valor: "Mujer", tipo: "Selección(Varón/Mujer)", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Profesional Asignado", valor: "Dra. Patricia Vega", tipo: "Selección", seccion: "Datos Administrativos", obligatorio: true },
+  { nombre: "Centro", valor: "CESFAM Norte", tipo: "Selección", seccion: "Centro", obligatorio: true },
+  { nombre: "Fecha de Inscripción", valor: "2023-02-12", tipo: "Fecha", seccion: "Datos Administrativos", obligatorio: true },
+  ],
+  // Documento 3
+  [
+  { nombre: "ID Persona", valor: "456321", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "N° de Historia", valor: "99887", tipo: "Numérico", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Documento (RUT)", valor: "11.222.333-4", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Nombres", valor: "Carlos", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Apellido Paterno", valor: "Rojas", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Apellido Materno", valor: "Morales", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Fecha de Nacimiento", valor: "1978-11-30", tipo: "Fecha", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Edad", valor: "46", tipo: "Numérico", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Sexo", valor: "Varón", tipo: "Selección(Varón/Mujer)", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Profesional Asignado", valor: "Dr. Matías Ruiz", tipo: "Selección", seccion: "Datos Administrativos", obligatorio: true },
+  { nombre: "Centro", valor: "CESFAM Oriente", tipo: "Selección", seccion: "Centro", obligatorio: true },
+  { nombre: "Fecha de Inscripción", valor: "2021-06-08", tipo: "Fecha", seccion: "Datos Administrativos", obligatorio: true },
+  ]
+  ];
+
+export function obtenerListaFichaMedicaOffline(usuario: string, clave: string) {
+  return documentosMedicos;
 }
-
-export function obtenerClasesConCoordenadasOffline(usuario) {
-  return horarios
-    .filter(h => h.usuario === usuario)
-    .map(h => {
-      const depto = departamentos.find(d => d.nombre === h.departamento);
-      return {
-        departamento: h.departamento.toUpperCase(),
-        bloque: h.bloque,
-        sala: h.sala,
-        dia: h.dia,
-        asignatura: h.asignatura,
-        x: depto?.x || null,
-        y: depto?.y || null
-      };
-    });
-}
-
-export function agregarCursoOffline(usuario, curso) {
-  horarios.push({ usuario, ...curso });  
-  return { ok: true };
-}
-
-export function eliminarCursoOffline(usuario, curso) {
-  horarios = horarios.filter(
-    h => !(h.usuario === usuario && h.dia === curso.dia && h.bloque === curso.bloque)
-  );
-  return { ok: true };
-}
-
-export function obtenerNombresDepartamentosOffline() {
-  const nombres = departamentos.map((d) => d.nombre);
-  return nombres;
-}
-
-
-

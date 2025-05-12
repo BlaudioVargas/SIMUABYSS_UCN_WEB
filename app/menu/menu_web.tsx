@@ -94,9 +94,11 @@ type CampoMedico = {
   tipo: string;
   seccion: string;
   obligatorio: boolean;
-};
+ };
 
-const medicalData: CampoMedico[] = [
+const medicalData: CampoMedico[][] = [
+  // Documento 1
+  [
   { nombre: "ID Persona", valor: "123456", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
   { nombre: "N° de Historia", valor: "78910", tipo: "Numérico", seccion: "Datos Personales", obligatorio: true },
   { nombre: "Documento (RUT)", valor: "12.345.678-9", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
@@ -109,8 +111,38 @@ const medicalData: CampoMedico[] = [
   { nombre: "Profesional Asignado", valor: "Dr. Alfredo González", tipo: "Selección", seccion: "Datos Administrativos", obligatorio: true },
   { nombre: "Centro", valor: "CESFAM Central", tipo: "Selección", seccion: "Centro", obligatorio: true },
   { nombre: "Fecha de Inscripción", valor: "2022-10-01", tipo: "Fecha", seccion: "Datos Administrativos", obligatorio: true },
-  // ... agrega el resto según necesites
-];
+  ],
+  // Documento 2
+  [
+  { nombre: "ID Persona", valor: "789123", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "N° de Historia", valor: "11223", tipo: "Numérico", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Documento (RUT)", valor: "98.765.432-1", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Nombres", valor: "María", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Apellido Paterno", valor: "Fernández", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Apellido Materno", valor: "López", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Fecha de Nacimiento", valor: "1990-07-22", tipo: "Fecha", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Edad", valor: "34", tipo: "Numérico", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Sexo", valor: "Mujer", tipo: "Selección(Varón/Mujer)", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Profesional Asignado", valor: "Dra. Patricia Vega", tipo: "Selección", seccion: "Datos Administrativos", obligatorio: true },
+  { nombre: "Centro", valor: "CESFAM Norte", tipo: "Selección", seccion: "Centro", obligatorio: true },
+  { nombre: "Fecha de Inscripción", valor: "2023-02-12", tipo: "Fecha", seccion: "Datos Administrativos", obligatorio: true },
+  ],
+  // Documento 3
+  [
+  { nombre: "ID Persona", valor: "456321", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "N° de Historia", valor: "99887", tipo: "Numérico", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Documento (RUT)", valor: "11.222.333-4", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Nombres", valor: "Carlos", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Apellido Paterno", valor: "Rojas", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Apellido Materno", valor: "Morales", tipo: "Texto", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Fecha de Nacimiento", valor: "1978-11-30", tipo: "Fecha", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Edad", valor: "46", tipo: "Numérico", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Sexo", valor: "Varón", tipo: "Selección(Varón/Mujer)", seccion: "Datos Personales", obligatorio: true },
+  { nombre: "Profesional Asignado", valor: "Dr. Matías Ruiz", tipo: "Selección", seccion: "Datos Administrativos", obligatorio: true },
+  { nombre: "Centro", valor: "CESFAM Oriente", tipo: "Selección", seccion: "Centro", obligatorio: true },
+  { nombre: "Fecha de Inscripción", valor: "2021-06-08", tipo: "Fecha", seccion: "Datos Administrativos", obligatorio: true },
+  ]
+  ];
 
 
 interface Props {
@@ -216,27 +248,26 @@ export const ListadoPacientesMenu = () => {
 };
 
 export const FichaMedicaActivaMenu = () => {
-  const [medicalDataState, setMedicalDataState] = useState(medicalData);
+  const [documentoSeleccionadoIndex, setDocumentoSeleccionadoIndex] = useState(0);
+  const [medicalDataState, setMedicalDataState] = useState<CampoMedico[][]>(medicalData);
 
-  // Función para manejar los cambios en los campos
+  const documentoActual = medicalDataState[documentoSeleccionadoIndex];
+
   const handleValorChange = (nombreCampo: string, nuevoValor: string) => {
-    setMedicalDataState((prevData) =>
-      prevData.map((campo) =>
-        campo.nombre === nombreCampo ? { ...campo, valor: nuevoValor } : campo
-      )
+    const nuevosDocumentos = [...medicalDataState];
+    nuevosDocumentos[documentoSeleccionadoIndex] = nuevosDocumentos[documentoSeleccionadoIndex].map((campo) =>
+      campo.nombre === nombreCampo ? { ...campo, valor: nuevoValor } : campo
     );
+    setMedicalDataState(nuevosDocumentos);
   };
 
-  // Función para guardar los datos modificados
   const handleSave = () => {
-    console.log('Datos guardados:', medicalDataState);
-    // Aquí puedes realizar la acción de guardado, como llamar a una API, localStorage, etc.
+    console.log('Documento guardado:', medicalDataState[documentoSeleccionadoIndex]);
   };
 
+  // Organizar campos por secciones
   const datosPorSeccion: { [key: string]: CampoMedico[] } = {};
-
-  // Organizar los datos por secciones
-  medicalDataState.forEach((campo) => {
+  documentoActual.forEach((campo) => {
     if (!datosPorSeccion[campo.seccion]) datosPorSeccion[campo.seccion] = [];
     datosPorSeccion[campo.seccion].push(campo);
   });
@@ -244,6 +275,30 @@ export const FichaMedicaActivaMenu = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Ficha Médica</Text>
+
+      {/* Selector de documento */}
+      <View style={{ marginBottom: 20 }}>
+        <Text>Seleccionar Documento:</Text>
+        <Picker
+          selectedValue={documentoSeleccionadoIndex}
+          onValueChange={(itemValue) => setDocumentoSeleccionadoIndex(itemValue)}
+          style={{ backgroundColor: '#f0f0f0', borderRadius: 6 }}
+        >
+          {medicalDataState.map((documento, index) => {
+            const apellido = documento.find((c) => c.nombre === 'Apellido Paterno')?.valor || 'Apellido';
+            const nombre = documento.find((c) => c.nombre === 'Nombres')?.valor || 'Nombre';
+            const fechaRaw = documento.find((c) => c.nombre === 'Fecha de Inscripción')?.valor || '0000-00-00';
+
+            const [yyyy, mm, dd] = fechaRaw.split('-');
+            const fechaFormateada = `${yyyy?.slice(2) || '00'}/${mm || '00'}/${dd || '00'}`;
+
+            const etiqueta = `${fechaFormateada} - ${apellido}, ${nombre}`;
+
+            return <Picker.Item key={index} label={etiqueta} value={index} />;
+          })}
+        </Picker>
+      </View>
+
       {Object.entries(datosPorSeccion).map(([seccionNombre, campos]) => (
         <View key={seccionNombre} style={styles.card}>
           <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>{seccionNombre}</Text>
@@ -253,10 +308,8 @@ export const FichaMedicaActivaMenu = () => {
             const isTexto = campo.tipo.toLowerCase() === 'texto';
             const isNumerico = campo.tipo.toLowerCase().includes('numérico');
 
-            // Selección (Picker)
             if (matchSeleccion) {
               const opciones = matchSeleccion[1].split('/').map((opt) => opt.trim());
-
               return (
                 <View key={campo.nombre} style={{ marginBottom: 10 }}>
                   <Text style={{ marginBottom: 4 }}>{campo.nombre}:</Text>
@@ -273,17 +326,16 @@ export const FichaMedicaActivaMenu = () => {
               );
             }
 
-            // Fecha (DateTimePicker o manual)
             if (isFecha) {
               return (
                 <FechaSelector
+                  key={campo.nombre}
                   campo={campo}
                   onChange={(valor) => handleValorChange(campo.nombre, valor)}
                 />
               );
             }
 
-            // Numérico (solo números)
             if (isNumerico) {
               return (
                 <View key={campo.nombre} style={{ marginBottom: 10 }}>
@@ -291,14 +343,21 @@ export const FichaMedicaActivaMenu = () => {
                   <TextInput
                     keyboardType="numeric"
                     value={campo.valor}
-                    onChangeText={(text) => handleValorChange(campo.nombre, text.replace(/[^0-9]/g, ''))}
-                    style={{ backgroundColor: '#fff', borderRadius: 6, padding: 8, borderWidth: 1, borderColor: '#ccc' }}
+                    onChangeText={(text) =>
+                      handleValorChange(campo.nombre, text.replace(/[^0-9]/g, ''))
+                    }
+                    style={{
+                      backgroundColor: '#fff',
+                      borderRadius: 6,
+                      padding: 8,
+                      borderWidth: 1,
+                      borderColor: '#ccc',
+                    }}
                   />
                 </View>
               );
             }
 
-            // Texto normal
             if (isTexto) {
               return (
                 <View key={campo.nombre} style={{ marginBottom: 10 }}>
@@ -306,13 +365,18 @@ export const FichaMedicaActivaMenu = () => {
                   <TextInput
                     value={campo.valor}
                     onChangeText={(text) => handleValorChange(campo.nombre, text)}
-                    style={{ backgroundColor: '#fff', borderRadius: 6, padding: 8, borderWidth: 1, borderColor: '#ccc' }}
+                    style={{
+                      backgroundColor: '#fff',
+                      borderRadius: 6,
+                      padding: 8,
+                      borderWidth: 1,
+                      borderColor: '#ccc',
+                    }}
                   />
                 </View>
               );
             }
 
-            // Otros tipos por defecto como solo lectura
             return (
               <View key={campo.nombre} style={{ marginBottom: 6 }}>
                 <Text>
@@ -324,8 +388,7 @@ export const FichaMedicaActivaMenu = () => {
         </View>
       ))}
 
-      {/* Botón de guardado */}
-      <Button title="Guardar Datos" onPress={handleSave} color="#4CAF50" />
+      <Button title="Guardar Documento" onPress={handleSave} color="#4CAF50" />
     </View>
   );
 };

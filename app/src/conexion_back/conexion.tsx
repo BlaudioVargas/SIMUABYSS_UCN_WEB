@@ -21,22 +21,7 @@ export function enviarCredencialesAlBackend(usuario, clave) {
   return postAlBackend(`${BASE_URL}/login`, { usuario, clave });
 }
 
-export function buscarHorariosPorUsuarioAlBackend(usuario, clave) {
+export function obtenerListaFichaMedicaBackend(usuario, clave) {
   return postAlBackend(`${BASE_URL}/buscar_horario`, { usuario });
 }
 
-export function obtenerClasesConCoordenadasAlBackend(usuario, clave) {
-  return postAlBackend(`${BASE_URL}/clases_coordenadas`, { usuario });
-}
-
-export function agregarCursoBackend(usuario, curso, clave) {
-  return postAlBackend(`${BASE_URL}/buscar_horario`, { usuario });
-}
-
-export function eliminarCursoBackend (usuario, curso, clave) {
-  return postAlBackend(`${BASE_URL}/clases_coordenadas`, { usuario });
-}
-
-export function obtenerNombresDepartamentosBackend (clave) {
-  return postAlBackend(`${BASE_URL}/clases_coordenadas`, { usuario });
-}
