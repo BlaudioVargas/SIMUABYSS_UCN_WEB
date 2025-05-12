@@ -1,56 +1,89 @@
 import React, { useState } from 'react';
-import { View, Text, Button, ScrollView } from 'react-native';
+import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import { MaterialIcons } from '@expo/vector-icons';
 import { HistorialMenu, ListadoPacientesMenu, FichaMedicaActivaMenu } from './menu/menu_web';
-import { styles } from './grafico/grafico';
 
 const Pantalla = () => {
   const router = useRouter();
   const { usuario, clave } = useLocalSearchParams();
-  const [botonActivo, setBotonActivo] = useState(0);
+  const [botonActivo, setBotonActivo] = useState('home');
 
-  // Lista de botones con sus respectivos títulos y componentes
+  // Mapeo de botones con íconos
   const botones = [
-    { titulo: 'Historial', componente: HistorialMenu },
-    { titulo: 'Listado Pacientes', componente: ListadoPacientesMenu },
-    { titulo: 'Ficha Médica Activa', componente: FichaMedicaActivaMenu },
-    // Puedes seguir agregando más:
-    // { titulo: 'Otro Módulo', componente: () => <OtroComponente /> },
+    {
+      key: 'home',
+      titulo: 'Inicio',
+      icon: 'home',
+      componente: HistorialMenu,
+    },
+    {
+      key: 'pacientes',
+      titulo: 'Pacientes',
+      icon: 'group',
+      componente: ListadoPacientesMenu,
+    },
+    {
+      key: 'consulta',
+      titulo: 'Consulta Adm.',
+      icon: 'supervisor-account',
+      componente: FichaMedicaActivaMenu,
+    },
   ];
+
+  const renderBoton = (key: string, icon: string, label: string) => (
+    <Pressable
+      key={key}
+      onPress={() => setBotonActivo(key)}
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        paddingVertical: 12,
+        paddingHorizontal: 10,
+        backgroundColor: botonActivo === key ? '#4682B4' : 'transparent',
+        borderRadius: 8,
+        marginBottom: 10,
+      }}
+    >
+      <MaterialIcons name={icon as any} size={24} color="white" />
+      <Text style={{ color: 'white', marginLeft: 10 }}>{label}</Text>
+    </Pressable>
+  );
+
+  const ComponenteActivo = botones.find((b) => b.key === botonActivo)?.componente;
 
   return (
     <View style={{ flex: 1, flexDirection: 'row' }}>
-      {/* Panel Izquierdo */}
-      <View style={{ flex: 3, backgroundColor: '#00008B', alignItems: 'center', padding: 20 }}>
-        <ScrollView contentContainerStyle={{ alignItems: 'center' }}>
-          {/* Info usuario */}
-          <View style={{ alignItems: 'center', marginBottom: 20 }}>
-            {/*<Text style={{ fontSize: 24, fontWeight: 'bold', color: 'white' }}>Datos de BlackBox</Text>*/}
-            <Text style={{ fontSize: 18, color: 'white' }}>Usuario: {usuario}</Text>
-            <Text style={{ fontSize: 18, color: 'white', marginBottom: 10 }}>Clave: {clave}</Text>
-          </View>
+      {/* Barra Lateral */}
+      <View style={{ width: 200, backgroundColor: '#00008B', padding: 20 }}>
+        <View style={{ marginBottom: 30 }}>
+          <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>Usuario: {usuario}</Text>
+          <Text style={{ color: 'white', fontSize: 14 }}>Clave: {clave}</Text>
+        </View>
 
-          {/* Render dinámico de botones */}
-          {botones.map((btn, index) => (
-            <View key={index} style={{ marginBottom: 10, width: '100%' }}>
-              <Button
-                title={btn.titulo}
-                onPress={() => setBotonActivo(index)}
-                disabled={botonActivo === index}
-                color={botonActivo === index ? 'grey' : 'lightblue'}
-              />
-            </View>
-          ))}
+        {botones.map(({ key, icon, titulo }) => renderBoton(key, icon, titulo))}
 
-          {/* Cerrar sesión */}
-          <Button title="CERRAR SESIÓN" onPress={() => router.push('/')} color="grey" />
-        </ScrollView>
+        <Pressable
+          onPress={() => router.push('/')}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 12,
+            paddingHorizontal: 10,
+            backgroundColor: 'darkred',
+            borderRadius: 8,
+            marginTop: 20,
+          }}
+        >
+          <MaterialIcons name="logout" size={24} color="white" />
+          <Text style={{ color: 'white', marginLeft: 10 }}>Cerrar Sesión</Text>
+        </Pressable>
       </View>
 
       {/* Panel Derecho */}
-      <View style={{ flex: 7, backgroundColor: '#87CEEB', padding: 20 }}>
+      <View style={{ flex: 1, backgroundColor: '#87CEEB', padding: 20 }}>
         <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-        {React.createElement(botones[botonActivo]?.componente)}
+          {ComponenteActivo ? React.createElement(ComponenteActivo) : <Text>Seleccione una opción</Text>}
         </ScrollView>
       </View>
     </View>

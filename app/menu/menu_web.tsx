@@ -2,6 +2,8 @@ import React, { useState , useEffect } from 'react';
 import { View, Text, Button, ScrollView , StyleSheet, TextInput, Platform, Pressable, TouchableOpacity, FlatList} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { styles } from '../grafico/grafico';
+import { MaterialIcons } from '@expo/vector-icons';
+
 
 const datosHistorial = [
   { nombre: 'Juan Pérez', rut: '12.345.678-9', fecha: '2025-03-21' },
@@ -191,7 +193,7 @@ export const HistorialMenu = () => {
 
   const cambiarOrden = (campo: 'nombre' | 'rut' | 'fecha') => {
     if (ordenCampo === campo) {
-      setAscendente(!ascendente); // Alterna si ya está seleccionado
+      setAscendente(!ascendente);
     } else {
       setOrdenCampo(campo);
       setAscendente(true);
@@ -199,13 +201,38 @@ export const HistorialMenu = () => {
   };
 
   return (
-    <View>
-      <Text style={{ fontSize: 22, fontWeight: 'bold', marginBottom: 10 }}>Historial de Pacientes</Text>
+    <View style={{ padding: 10 }}>
+      <Text style={{
+        fontSize: 22,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        padding: 10,
+        borderWidth: 2,
+        borderColor: '#007BFF',
+        borderRadius: 5,
+        textAlign: 'center'
+      }}>
+        Historial de Pacientes
+      </Text>
 
-      {/* Encabezado con botones de ordenamiento */}
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginBottom: 10 }}>
+      {/* Encabezado con columnas vacías para íconos */}
+      <View style={{
+        flexDirection: 'row',
+        backgroundColor: '#E0E0E0',
+        paddingVertical: 8,
+        borderTopWidth: 1,
+        borderBottomWidth: 1,
+        borderColor: '#999'
+      }}>
+        <View style={{ width: 40 }} /> {/* espacio para icono 1 */}
+        <View style={{ width: 40 }} /> {/* espacio para icono 2 */}
+
         {['nombre', 'rut', 'fecha'].map((campo) => (
-          <TouchableOpacity key={campo} onPress={() => cambiarOrden(campo as any)}>
+          <TouchableOpacity
+            key={campo}
+            style={{ flex: 1, alignItems: 'center' }}
+            onPress={() => cambiarOrden(campo as any)}
+          >
             <Text style={{ fontWeight: ordenCampo === campo ? 'bold' : 'normal' }}>
               {campo.charAt(0).toUpperCase() + campo.slice(1)}
               {ordenCampo === campo ? (ascendente ? ' ↑' : ' ↓') : ''}
@@ -219,16 +246,37 @@ export const HistorialMenu = () => {
         data={pacientesOrdenados}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <View style={{ paddingVertical: 8, borderBottomWidth: 1, borderColor: '#ccc' }}>
-            <Text><Text style={{ fontWeight: 'bold' }}>Nombre:</Text> {item.nombre}</Text>
-            <Text><Text style={{ fontWeight: 'bold' }}>RUT:</Text> {item.rut}</Text>
-            <Text><Text style={{ fontWeight: 'bold' }}>Fecha:</Text> {item.fecha}</Text>
+          <View style={{
+            flexDirection: 'row',
+            borderBottomWidth: 1,
+            borderColor: '#ccc',
+            paddingVertical: 10,
+            alignItems: 'center'
+          }}>
+            <View style={{ width: 40, alignItems: 'center' }}>
+              <MaterialIcons name="manage-accounts" size={24} color="#007BFF" />
+            </View>
+            <View style={{ width: 40, alignItems: 'center' }}>
+              <MaterialIcons name="person-search" size={24} color="#28A745" />
+            </View>
+
+            <View style={{ flex: 1, alignItems: 'center' }}>
+              <Text>{item.nombre}</Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'center' }}>
+              <Text>{item.rut}</Text>
+            </View>
+            <View style={{ flex: 1, alignItems: 'center' }}>
+              <Text>{item.fecha}</Text>
+            </View>
           </View>
         )}
       />
     </View>
   );
 };
+
+
 
 // 👉 Funciones externas para mostrar contenido en la izquierda
 export const ListadoPacientesMenu = () => {
