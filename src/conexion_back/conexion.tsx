@@ -7,6 +7,7 @@ type LoginPayload = {
 
 type LoginResponse = {
   access_token: string;
+  refresh_token: string;
   user: {
     id: number;
     name: string;
@@ -36,3 +37,5 @@ export async function loginUsuario(email: string, password: string): Promise<Log
   const payload: LoginPayload = { email, password };
   return post<LoginPayload, LoginResponse>(`${BASE_URL}/login`, payload);
 }
+
+

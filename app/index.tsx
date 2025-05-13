@@ -11,26 +11,37 @@ export default function HomeScreen() {
   const { width, height } = useWindowDimensions();
   const isPortrait = height > width;
 
+  
+
   const iniciarSesion = async () => {
-    try {
-      const respuesta = await loginUsuario(usuario, clave);
-      setMensajeError('');
+  try {
+    const respuesta = await loginUsuario(usuario, clave);
+    setMensajeError('');
 
-      // Aquí podrías guardar el token en un store/context/AsyncStorage
-      // Por ahora solo redirige con los datos
-      router.push({
-        pathname: '/layout',
-        params: { token: respuesta.access_token, email: respuesta.user.email }
-      });
-
-    } catch (error: any) {
-      console.error("Error al iniciar sesión:", error);
-      const mensaje = error.message.includes('401') 
-        ? 'Credenciales incorrectas' 
-        : 'Error inesperado al iniciar sesión';
-      setMensajeError(mensaje);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('accesstoken', respuesta.access_token);
+      localStorage.setItem('refreshtoken', respuesta.refresh_token);
+      localStorage.setItem('email', respuesta.user.email);
     }
-  };
+
+    // Navegación con parámetros
+    router.push({
+      pathname: '/layout',
+      params: {
+        token: respuesta.access_token,
+        email: respuesta.user.email
+      }
+    });
+
+  } catch (error: any) {
+    console.error("Error al iniciar sesión:", error);
+    const mensaje = error.message.includes('401') 
+      ? 'Credenciales incorrectas' 
+      : 'Error inesperado al iniciar sesión';
+    setMensajeError(mensaje);
+  }
+};
+
 
   const renderFormulario = () => (
     <View style={{ flex: 1, backgroundColor: '#00008B', justifyContent: 'center', alignItems: 'center' }}>
