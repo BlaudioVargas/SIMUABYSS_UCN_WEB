@@ -3,7 +3,7 @@ import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import HistorialMenu from './screens/HistorialMenu';
-import { ListadoPacientesMenu } from '@/components/ListadoPacientesMenu';
+//import { ListadoPacientesMenu } from '@/components/ListadoPacientesMenu';
 import FichaMedicaActivaMenu  from './screens/FichaMedicaActivaMenu';
 
 
@@ -16,16 +16,10 @@ const Pantalla = () => {
   // Mapeo de botones con íconos
   const botones = [
     {
-      key: 'home',
-      titulo: 'Inicio',
-      icon: 'home',
-      componente: HistorialMenu,
-    },
-    {
       key: 'pacientes',
       titulo: 'Pacientes',
       icon: 'group',
-      componente: ListadoPacientesMenu,
+      componente: HistorialMenu,
     },
     {
       key: 'consulta',

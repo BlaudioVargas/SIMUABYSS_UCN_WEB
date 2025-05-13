@@ -1,185 +1,87 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Button, Image, ImageBackground, StyleSheet, useWindowDimensions,Dimensions  } from 'react-native';
+import { View, Text, TextInput, Button, Image, ImageBackground, StyleSheet, useWindowDimensions } from 'react-native';
 import { useRouter } from 'expo-router';
-import { validarCredenciales } from '../src/validacion';
-
-class BlackBox {
-  private usuario: string;
-  private clave: string;
-
-  constructor() {
-    this.usuario = '';
-    this.clave = '';
-  }
-
-  setUsuario(usuario: string) {
-    this.usuario = usuario;
-  }
-
-  setClave(clave: string) {
-    this.clave = clave;
-  }
-
-  getUsuario(): string {
-    return this.usuario;
-  }
-
-  getClave(): string {
-    return this.clave;
-  }
-}
-
-const blackbox = new BlackBox();
+import { loginUsuario } from '../src/conexion_back/conexion';
 
 export default function HomeScreen() {
   const [usuario, setUsuario] = useState('');
   const [clave, setClave] = useState('');
   const [mensajeError, setMensajeError] = useState('');
   const router = useRouter();
-  
-  // Obtener dimensiones de la ventana para determinar la orientación
   const { width, height } = useWindowDimensions();
-  const isPortrait = height > width;  // Si la altura es mayor que el ancho, estamos en vertical
+  const isPortrait = height > width;
 
   const iniciarSesion = async () => {
-    blackbox.setUsuario(usuario);
-    blackbox.setClave(clave);
-
     try {
-      const resultado = await validarCredenciales(blackbox.getUsuario(), blackbox.getClave());
+      const respuesta = await loginUsuario(usuario, clave);
+      setMensajeError('');
 
-      if (resultado === 1) {
-        setMensajeError('');
-        router.push({
-          pathname: '/layout',
-          params: { usuario: blackbox.getUsuario(), clave: blackbox.getClave() }
-        });
-      } else if (resultado === 2) {
-        setMensajeError("Usuario incorrecto");
-      } else if (resultado === 3) {
-        setMensajeError("Contraseña incorrecta");
-      }
-    } catch (error) {
-      setMensajeError("Error inesperado al iniciar sesión");
-      console.error("Error en la autenticación:", error);
+      // Aquí podrías guardar el token en un store/context/AsyncStorage
+      // Por ahora solo redirige con los datos
+      router.push({
+        pathname: '/layout',
+        params: { token: respuesta.access_token, email: respuesta.user.email }
+      });
+
+    } catch (error: any) {
+      console.error("Error al iniciar sesión:", error);
+      const mensaje = error.message.includes('401') 
+        ? 'Credenciales incorrectas' 
+        : 'Error inesperado al iniciar sesión';
+      setMensajeError(mensaje);
     }
   };
 
+  const renderFormulario = () => (
+    <View style={{ flex: 1, backgroundColor: '#00008B', justifyContent: 'center', alignItems: 'center' }}>
+      <TextInput
+        placeholder="Usuario"
+        value={usuario}
+        onChangeText={setUsuario}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Clave"
+        value={clave}
+        onChangeText={setClave}
+        secureTextEntry
+        style={styles.input}
+      />
+      {mensajeError !== '' && <Text style={styles.errorText}>{mensajeError}</Text>}
+      <View style={styles.boton}>
+        <Button title="LOGIN" onPress={iniciarSesion} color="grey" />
+      </View>
+    </View>
+  );
+
   return (
     <View style={{ flex: 1 }}>
-      {/* Cambiar el orden de las vistas según la orientación */}
       {isPortrait ? (
-        // Pantalla vertical
         <View style={{ flex: 1 }}>
-          {/* Parte superior - Celeste */}
           <ImageBackground
-              source={{ uri: 'https://www.noticias.ucn.cl/wp-content/uploads/2022/03/WhatsApp-Image-2022-03-21-at-1.44.47-PM.jpeg' }}
-              style={{
-                width: '100%',   // Ocupa todo el ancho de la pantalla
-                height: 300,     // Altura fija
-                justifyContent: 'center', // Asegura que el contenido se centre en la pantalla
-              }}
-              resizeMode="cover"
-            >
-              {/* Overlay translúcido celeste */}
-              <View style={{
-                ...StyleSheet.absoluteFillObject,
-                backgroundColor: 'rgba(135, 206, 250, 0.6)',  // Color translúcido
-                justifyContent: 'center',
-                alignItems: 'center',
-                paddingTop: 50, // Asegura que el contenido no quede pegado a la parte superior
-              }}>
-                {/* Escudo en la esquina superior izquierda */}
-                <Image
-                  source={{ uri: 'https://ucnold.ucn.cl/wp-content/uploads/2018/05/Escudo-UCN-Full-Color.png' }}
-                  style={{
-                    width: 100,               // Ancho del escudo
-                    height: 100,              // Alto del escudo
-                    resizeMode: 'contain',    // Asegura que no se distorsione
-                    position: 'absolute',     // Posiciona la imagen libremente
-                    top: 0,                   // En la parte superior
-                    left: 0,                  // A la izquierda
-                  }}
-                />
-
-                {/* Texto ajustable al 80% del ancho */}
-                <Text style={{
-                  fontSize: width * 0.1,     // Ajusta el tamaño del texto al 10% del ancho de la pantalla
-                  fontWeight: 'bold',
-                  color: 'white',
-                  marginTop: 120,            // Espacio desde el escudo
-                  textAlign: 'center',      // Centra el texto
-                  width: '80%',             // El texto ocupará el 80% del ancho
-                }}>
-                  SimuAbyssUCN
-                </Text>
-              </View>
-            </ImageBackground>
-
-          {/* Parte inferior - Azul con imagen */}
-          <View style={{ flex: 1, backgroundColor: '#00008B', justifyContent: 'center', alignItems: 'center' }}>
-            
-            <TextInput
-              placeholder="Usuario"
-              value={usuario}
-              onChangeText={setUsuario}
-              style={{ width: 200, height: 40, borderBottomWidth: 1, marginBottom: 10, backgroundColor: 'white' }}
-            />
-            <TextInput
-              placeholder="Clave"
-              value={clave}
-              onChangeText={setClave}
-              secureTextEntry
-              style={{ width: 200, height: 40, borderBottomWidth: 1, marginBottom: 10, backgroundColor: 'white' }}
-            />
-            {mensajeError !== '' && <Text style={{ color: 'red', marginBottom: 10 }}>{mensajeError}</Text>}
-            {/* Botón con estilo personalizado */}
-            <View style={{ width: 250, backgroundColor: 'gray', borderRadius: 5 }}>
-              <Button title="LOGIN" onPress={iniciarSesion} color="grey" />
+            source={{ uri: 'https://www.noticias.ucn.cl/wp-content/uploads/2022/03/WhatsApp-Image-2022-03-21-at-1.44.47-PM.jpeg' }}
+            style={styles.imageBackground}
+            resizeMode="cover"
+          >
+            <View style={styles.overlay}>
+              <Image
+                source={{ uri: 'https://ucnold.ucn.cl/wp-content/uploads/2018/05/Escudo-UCN-Full-Color.png' }}
+                style={styles.logo}
+              />
+              <Text style={{ ...styles.titulo, fontSize: width * 0.1 }}>SimuAbyssUCN</Text>
             </View>
-          </View>
+          </ImageBackground>
+          {renderFormulario()}
         </View>
-        
       ) : (
-        // Pantalla horizontal
         <View style={{ flex: 1, flexDirection: 'row' }}>
-          {/* Parte izquierda - Azul */}
-          <View style={{ flex: 0.9, backgroundColor: '#00008B', justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: width * 0.05, fontWeight: 'bold', color: 'white', marginBottom: 20 ,width: '80%', }}>SimuAbyssUCN</Text>
-            <TextInput
-              placeholder="Usuario"
-              value={usuario}
-              onChangeText={setUsuario}
-              style={{ width: 200, height: 40, borderBottomWidth: 1, marginBottom: 10, backgroundColor: 'white' }}
-            />
-            <TextInput
-              placeholder="Clave"
-              value={clave}
-              onChangeText={setClave}
-              secureTextEntry
-              style={{ width: 200, height: 40, borderBottomWidth: 1, marginBottom: 10, backgroundColor: 'white' }}
-            />
-            {mensajeError !== '' && <Text style={{ color: 'red', marginBottom: 10 }}>{mensajeError}</Text>}
-            {/* Botón con estilo personalizado */}
-            <View style={{ width: 250, backgroundColor: 'gray', borderRadius: 5 }}>
-              <Button title="LOGIN" onPress={iniciarSesion} color="grey" />
-            </View>
-          </View>
-
-          {/* Parte derecha - Fondo con imagen y overlay celeste + escudo */}
+          {renderFormulario()}
           <ImageBackground
             source={{ uri: 'https://www.noticias.ucn.cl/wp-content/uploads/2022/03/WhatsApp-Image-2022-03-21-at-1.44.47-PM.jpeg' }}
             style={{ flex: 1 }}
             resizeMode="cover"
           >
-            {/* Overlay translúcido celeste */}
-            <View style={{
-              ...StyleSheet.absoluteFillObject,
-              backgroundColor: 'rgba(135, 206, 250, 0.6)',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}>
-              {/* Escudo centrado */}
+            <View style={styles.overlay}>
               <Image
                 source={{ uri: 'https://ucnold.ucn.cl/wp-content/uploads/2018/05/Escudo-UCN-Full-Color.png' }}
                 style={{ width: width * 0.4, height: 700, resizeMode: 'contain' }}
@@ -191,3 +93,49 @@ export default function HomeScreen() {
     </View>
   );
 }
+
+const styles = StyleSheet.create({
+  input: {
+    width: 200,
+    height: 40,
+    borderBottomWidth: 1,
+    marginBottom: 10,
+    backgroundColor: 'white'
+  },
+  boton: {
+    width: 250,
+    backgroundColor: 'gray',
+    borderRadius: 5
+  },
+  errorText: {
+    color: 'red',
+    marginBottom: 10
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(135, 206, 250, 0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 50
+  },
+  imageBackground: {
+    width: '100%',
+    height: 300,
+    justifyContent: 'center'
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    resizeMode: 'contain',
+    position: 'absolute',
+    top: 0,
+    left: 0
+  },
+  titulo: {
+    fontWeight: 'bold',
+    color: 'white',
+    marginTop: 120,
+    textAlign: 'center',
+    width: '80%'
+  }
+});
