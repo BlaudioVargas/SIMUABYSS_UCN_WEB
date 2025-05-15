@@ -77,13 +77,6 @@ const Pantalla = () => {
           <Text style={{ color: 'white', marginLeft: 10 }}>Cerrar Sesión</Text>
         </Pressable>
       </View>
-
-      {/* Panel Derecho */}
-      <View style={{ flex: 1, backgroundColor: '#87CEEB', padding: 20 }}>
-        <ScrollView contentContainerStyle={{ paddingBottom: 100 }}>
-          {ComponenteActivo ? React.createElement(ComponenteActivo) : <Text>Seleccione una opción</Text>}
-        </ScrollView>
-      </View>
     </View>
   );
 };

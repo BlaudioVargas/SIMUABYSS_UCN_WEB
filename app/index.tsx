@@ -44,7 +44,7 @@ export default function HomeScreen() {
 
 
   const renderFormulario = () => (
-    <View style={{ flex: 1, backgroundColor: '#00008B', justifyContent: 'center', alignItems: 'center' }}>
+    <View style={{ flex: 1, backgroundColor: '#0069c0', justifyContent: 'center', alignItems: 'center' }}>
       <TextInput
         placeholder="Usuario"
         value={usuario}
@@ -76,7 +76,7 @@ export default function HomeScreen() {
           >
             <View style={styles.overlay}>
               <Image
-                source={{ uri: 'https://ucnold.ucn.cl/wp-content/uploads/2018/05/Escudo-UCN-Full-Color.png' }}
+              source={{ uri: 'https://ucnold.ucn.cl/wp-content/uploads/2018/05/Escudo-UCN-Full-Color.png' }}
                 style={styles.logo}
               />
               <Text style={{ ...styles.titulo, fontSize: width * 0.1 }}>SimuAbyssUCN</Text>
