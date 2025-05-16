@@ -11,23 +11,35 @@ import { datosHistorial } from "@/constants/constantes";
 import { MaterialIcons } from "@expo/vector-icons";
 
 export default function HistorialMenu() {
-	const [ordenCampo, setOrdenCampo] = useState<"nombre" | "rut" | "fecha">(
-		"fecha"
-	);
+	const [ordenCampo, setOrdenCampo] = useState<
+		"nombre" | "edad" | "rut" | "prestacion" | "prevision" | "nota"
+	>("nombre");
 	const [ascendente, setAscendente] = useState(true);
+
 	const pacientesOrdenados = ordenarPorCampo(
 		datosHistorial,
 		ordenCampo,
 		ascendente
 	);
 
-	const cambiarOrden = (campo: "nombre" | "rut" | "fecha") => {
+	const cambiarOrden = (
+		campo: "nombre" | "edad" | "rut" | "prestacion" | "prevision" | "nota"
+	) => {
 		if (ordenCampo === campo) setAscendente(!ascendente);
 		else {
 			setOrdenCampo(campo);
 			setAscendente(true);
 		}
 	};
+
+	const campos = [
+		{ key: "nombre", label: "Nombre" },
+		{ key: "edad", label: "Edad" },
+		{ key: "rut", label: "RUT" },
+		{ key: "prestacion", label: "Prestación" },
+		{ key: "prevision", label: "Previsión" },
+		{ key: "nota", label: "Nota" },
+	];
 
 	return (
 		<View style={{ padding: 10 }}>
@@ -41,6 +53,8 @@ export default function HistorialMenu() {
 			>
 				Historial de Pacientes
 			</Text>
+
+			{/* Header */}
 			<View
 				style={{
 					flexDirection: "row",
@@ -53,19 +67,21 @@ export default function HistorialMenu() {
 			>
 				<View style={{ width: 40 }} />
 				<View style={{ width: 40 }} />
-				{["nombre", "rut", "fecha"].map((campo) => (
+				{campos.map(({ key, label }) => (
 					<TouchableOpacity
-						key={campo}
+						key={key}
 						style={{ flex: 1, alignItems: "center" }}
-						onPress={() => cambiarOrden(campo as any)}
+						onPress={() => cambiarOrden(key as any)}
 					>
-						<Text style={{ fontWeight: ordenCampo === campo ? "bold" : "normal" }}>
-							{campo.charAt(0).toUpperCase() + campo.slice(1)}
-							{ordenCampo === campo ? (ascendente ? " ↑" : " ↓") : ""}
+						<Text style={{ fontWeight: ordenCampo === key ? "bold" : "normal" }}>
+							{label}
+							{ordenCampo === key ? (ascendente ? " ↑" : " ↓") : ""}
 						</Text>
 					</TouchableOpacity>
 				))}
 			</View>
+
+			{/* Rows */}
 			<FlatList
 				data={pacientesOrdenados}
 				keyExtractor={(_, index) => index.toString()}
@@ -89,10 +105,19 @@ export default function HistorialMenu() {
 							<Text>{item.nombre}</Text>
 						</View>
 						<View style={{ flex: 1, alignItems: "center" }}>
+							<Text>{item.edad}</Text>
+						</View>
+						<View style={{ flex: 1, alignItems: "center" }}>
 							<Text>{item.rut}</Text>
 						</View>
 						<View style={{ flex: 1, alignItems: "center" }}>
-							<Text>{item.fecha}</Text>
+							<Text>{item.prestacion}</Text>
+						</View>
+						<View style={{ flex: 1, alignItems: "center" }}>
+							<Text>{item.prevision}</Text>
+						</View>
+						<View style={{ flex: 1, alignItems: "center" }}>
+							<Text>{item.nota}</Text>
 						</View>
 					</View>
 				)}

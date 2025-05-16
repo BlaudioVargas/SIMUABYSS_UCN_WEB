@@ -1,152 +1,165 @@
-import { useState } from 'react';
-import { View, Text, TextInput, Button, Image, ImageBackground, StyleSheet, useWindowDimensions } from 'react-native';
-import { useRouter } from 'expo-router';
-import { loginUsuario } from '../src/conexion_back/conexion';
+import { router } from 'expo-router';
+import React, { useState } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+} from 'react-native';
 
-export default function HomeScreen() {
-  const [usuario, setUsuario] = useState('');
-  const [clave, setClave] = useState('');
-  const [mensajeError, setMensajeError] = useState('');
-  const router = useRouter();
-  const { width, height } = useWindowDimensions();
-  const isPortrait = height > width;
+const { width } = Dimensions.get('window');
 
-  
+export default function LoginScreen() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
-  const iniciarSesion = async () => {
-  try {
-    const respuesta = await loginUsuario(usuario, clave);
-    setMensajeError('');
-
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('accesstoken', respuesta.access_token);
-      localStorage.setItem('refreshtoken', respuesta.refresh_token);
-      localStorage.setItem('email', respuesta.user.email);
-    }
-
-    // Navegación con parámetros
-    router.push({
-      pathname: '/layout',
-      params: {
-        token: respuesta.access_token,
-        email: respuesta.user.email
-      }
-    });
-
-  } catch (error: any) {
-    console.error("Error al iniciar sesión:", error);
-    const mensaje = error.message.includes('401') 
-      ? 'Credenciales incorrectas' 
-      : 'Error inesperado al iniciar sesión';
-    setMensajeError(mensaje);
-  }
-};
-
-
-  const renderFormulario = () => (
-    <View style={{ flex: 1, backgroundColor: '#0069c0', justifyContent: 'center', alignItems: 'center' }}>
-      <TextInput
-        placeholder="Usuario"
-        value={usuario}
-        onChangeText={setUsuario}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Clave"
-        value={clave}
-        onChangeText={setClave}
-        secureTextEntry
-        style={styles.input}
-      />
-      {mensajeError !== '' && <Text style={styles.errorText}>{mensajeError}</Text>}
-      <View style={styles.boton}>
-        <Button title="LOGIN" onPress={iniciarSesion} color="grey" />
-      </View>
-    </View>
-  );
+  const handleLogin = () => {
+    //Poner logica usando el hook
+    console.log('Usuario:', username);
+    console.log('Contraseña:', password);
+  };
 
   return (
-    <View style={{ flex: 1 }}>
-      {isPortrait ? (
-        <View style={{ flex: 1 }}>
-          <ImageBackground
-            source={{ uri: 'https://www.noticias.ucn.cl/wp-content/uploads/2022/03/WhatsApp-Image-2022-03-21-at-1.44.47-PM.jpeg' }}
-            style={styles.imageBackground}
-            resizeMode="cover"
-          >
-            <View style={styles.overlay}>
-              <Image
-              source={{ uri: 'https://ucnold.ucn.cl/wp-content/uploads/2018/05/Escudo-UCN-Full-Color.png' }}
-                style={styles.logo}
-              />
-              <Text style={{ ...styles.titulo, fontSize: width * 0.1 }}>SimuAbyssUCN</Text>
-            </View>
-          </ImageBackground>
-          {renderFormulario()}
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {/* Parte Izquierda */}
+      <ImageBackground
+        source={{
+          uri: 'https://www.noticias.ucn.cl/wp-content/uploads/2022/03/WhatsApp-Image-2022-03-21-at-1.44.47-PM.jpeg',
+        }}
+        style={styles.leftPanel}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          <Image
+            source={{
+              uri: 'https://ucnold.ucn.cl/wp-content/uploads/2018/05/Escudo-UCN-Full-Color.png',
+            }}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.tagline}>Bienvenido a SIMUABYSS UCN
+            Aqui va la leyenda de la app.
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
+            minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
+            voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
+            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+          </Text>
         </View>
-      ) : (
-        <View style={{ flex: 1, flexDirection: 'row' }}>
-          {renderFormulario()}
-          <ImageBackground
-            source={{ uri: 'https://www.noticias.ucn.cl/wp-content/uploads/2022/03/WhatsApp-Image-2022-03-21-at-1.44.47-PM.jpeg' }}
-            style={{ flex: 1 }}
-            resizeMode="cover"
-          >
-            <View style={styles.overlay}>
-              <Image
-                source={{ uri: 'https://ucnold.ucn.cl/wp-content/uploads/2018/05/Escudo-UCN-Full-Color.png' }}
-                style={{ width: width * 0.4, height: 700, resizeMode: 'contain' }}
-              />
-            </View>
-          </ImageBackground>
+      </ImageBackground>
+
+      {/* Parte Derecha */}
+      <View style={styles.rightPanel}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Iniciar Sesión</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="ejemplo@alumnos.ucn.cl o ejemplo@ucn.cl"
+            placeholderTextColor="#aaa"
+            value={username}
+            onChangeText={setUsername}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            placeholderTextColor="#aaa"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <TouchableOpacity style={styles.button} onPress={() => router.push('/docente/CrearPaciente')}>
+            <Text style={styles.buttonText}>Entrar</Text>
+          </TouchableOpacity>
         </View>
-      )}
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  input: {
-    width: 200,
-    height: 40,
-    borderBottomWidth: 1,
-    marginBottom: 10,
-    backgroundColor: 'white'
+  container: {
+    flex: 1,
+    flexDirection: width >= 768 ? 'row' : 'column',
   },
-  boton: {
-    width: 250,
-    backgroundColor: 'gray',
-    borderRadius: 5
-  },
-  errorText: {
-    color: 'red',
-    marginBottom: 10
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(135, 206, 250, 0.6)',
+  leftPanel: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingTop: 50
   },
-  imageBackground: {
-    width: '100%',
-    height: 300,
-    justifyContent: 'center'
+  overlay: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 30,
+    borderRadius: 16,
+    alignItems: 'center',
   },
   logo: {
-    width: 100,
-    height: 100,
-    resizeMode: 'contain',
-    position: 'absolute',
-    top: 0,
-    left: 0
+    width: 120,
+    height: 120,
+    marginBottom: 20,
   },
-  titulo: {
-    fontWeight: 'bold',
+  tagline: {
     color: 'white',
-    marginTop: 120,
+    fontSize: 20,
+    fontWeight: '600',
     textAlign: 'center',
-    width: '80%'
-  }
+  },
+  rightPanel: {
+    flex: 1,
+    backgroundColor: '#1E3A8A', // Azul oscuro
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: 'white',
+    padding: 25,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    alignSelf: 'center',
+    color: '#333',
+  },
+  input: {
+    height: 50,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    fontSize: 16,
+    backgroundColor: '#fafafa',
+  },
+  button: {
+    backgroundColor: '#4682B4',
+    paddingVertical: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
 });
