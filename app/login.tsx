@@ -78,7 +78,7 @@ export default function LoginScreen() {
             onChangeText={setPassword}
           />
 
-          <TouchableOpacity style={styles.button} onPress={() => router.replace('/docente/CrearPaciente')}>
+          <TouchableOpacity style={styles.button} onPress={() => router.push('/docente/CrearPaciente')}>
             <Text style={styles.buttonText}>Entrar</Text>
           </TouchableOpacity>
         </View>
