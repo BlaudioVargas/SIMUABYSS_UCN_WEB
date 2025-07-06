@@ -1,3 +1,4 @@
+import { useAuth } from '@/components/AuthContext';
 import { router } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -18,9 +19,12 @@ const { width } = Dimensions.get('window');
 export default function LoginScreen() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const {login} = useAuth();
 
-  const handleLogin = () => {
-    //Poner logica usando el hook
+  const handleLogin = async () => {
+    await login(username,password);
+    router.push('/docente/CrearPaciente')
+    //------
     console.log('Usuario:', username);
     console.log('Contraseña:', password);
   };
@@ -47,11 +51,8 @@ export default function LoginScreen() {
             resizeMode="contain"
           />
           <Text style={styles.tagline}>Bienvenido a SIMUABYSS UCN
-            Aqui va la leyenda de la app.
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-            minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-            voluptate velit esse cillum dolore eu fugiat nulla pariatur. 
-            Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+            El motivo de esta aplicacion es familiarizar a los estudiantes de medicina de la UCN con 
+            el uso de sistemas clínicos reales como AVIS, mediante una simulación práctica y educativa.
           </Text>
         </View>
       </ImageBackground>
@@ -78,7 +79,7 @@ export default function LoginScreen() {
             onChangeText={setPassword}
           />
 
-          <TouchableOpacity style={styles.button} onPress={() => router.push('/docente/CrearPaciente')}>
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
             <Text style={styles.buttonText}>Entrar</Text>
           </TouchableOpacity>
         </View>

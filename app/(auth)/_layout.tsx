@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { View, Text, Pressable, StyleSheet } from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, Slot } from "expo-router";
+import { useAuth } from "@/components/AuthContext";
 
 export default function AuthLayout() {
+	const {logout} = useAuth();
 	const [botonActivo, setBotonActivo] = useState("login");
 
 	const botones = [
@@ -18,6 +20,11 @@ export default function AuthLayout() {
 			icon: "person-add",
 		},
 	];
+
+	const handleLogOut= () => {
+		logout();
+		router.push('/');
+	}; 
 
 	const handlePress = (key: string) => {
 		setBotonActivo(key);
@@ -38,10 +45,10 @@ export default function AuthLayout() {
 	return (
 		<View style={styles.contenedor}>
 			<View style={styles.lateral}>
-				<Text style={styles.titulo}>Autenticación</Text>
+				<Text style={styles.titulo}>Simuabyss DOCENTE</Text>
 				{botones.map(({ key, icon, titulo }) => renderButton(key, icon, titulo))}
 				<Pressable
-					onPress={() => console.log("Cerrar sesión")}
+					onPress={handleLogOut}
 					style={[styles.boton, { backgroundColor: "darkred", marginTop: 30 }]}
 				>
 					<MaterialIcons name="logout" size={24} color="white" />

@@ -11,9 +11,10 @@ type User = {
 
 type AuthContextType = {
 	user: User | null;
-	token: string | null;
+	accessToken: string | null;
+    refreshToken: string | null;
 	login: (email: string, password: string) => Promise<void>;
-	//logout: () => Promise<void>;
+	logout: () => Promise<void>;
 	//loading: boolean;
 };
 
@@ -21,10 +22,14 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
-    return useContext(AuthContext);
+	const context = useContext(AuthContext);
+	if (context === undefined) {
+		throw new Error('useAuth must be used within an AuthProvider');
+	}
+	return context;
 };
 export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
-
+    //quitar los consolelog
     const [user, setUser] = useState<User | null>(null);
     const [accessToken, setAccessToken] = useLocalStorage<string | null>('accessToken', null);
     const [refreshToken, setRefreshToken] = useLocalStorage<string | null>('refreshToken', null);
@@ -44,14 +49,14 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         console.log(refreshToken);
     }
 
-    const logout = () => {
-        // setUser(null);
+    const logout = async () => {
+        setUser(null);
         setAccessToken(null);
         setRefreshToken(null);
     };
 
     return (
-        <AuthContext.Provider value={{ user ,token: 'token', login}}>
+        <AuthContext.Provider value={{ user , accessToken, refreshToken, login, logout}}>
             {children}
         </AuthContext.Provider>
     )

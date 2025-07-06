@@ -4,20 +4,33 @@ import {
 	Text,
 	TouchableOpacity,
 	View,
+	ActivityIndicator,
+	RefreshControl,
 } from "react-native";
 import React, { useState } from "react";
 import { ordenarPorCampo } from "@/utils/sortUtils";
-import { datosHistorial } from "@/constants/constantes";
 import { MaterialIcons } from "@expo/vector-icons";
+import { useObtenerPacientes } from "@/hooks/useObtenerPacientes";
 
 export default function HistorialMenu() {
+	const { pacientes, loading, obtenerPacientes } = useObtenerPacientes();
 	const [ordenCampo, setOrdenCampo] = useState<
 		"nombre" | "edad" | "rut" | "prestacion" | "prevision" | "nota"
 	>("nombre");
 	const [ascendente, setAscendente] = useState(true);
 
+	const pacientesTransformados = pacientes.map((p) => ({
+	nombre: `${p.nombres ?? ""} ${p.apellidoPaterno ?? ""} ${p.apellidoMaterno ?? ""}`.trim(),
+	edad: p.edad,
+	rut: p.rut,
+	prestacion: p.motivo,
+	prevision: p.prevision,
+	nota: p.comentarios ?? "", // "comentario" del backend se usa como "nota"
+	}));
+
+	// Ordenar pacientes con la misma lógica que antes
 	const pacientesOrdenados = ordenarPorCampo(
-		datosHistorial,
+		pacientesTransformados,
 		ordenCampo,
 		ascendente
 	);
@@ -81,47 +94,53 @@ export default function HistorialMenu() {
 				))}
 			</View>
 
-			{/* Rows */}
-			<FlatList
-				data={pacientesOrdenados}
-				keyExtractor={(_, index) => index.toString()}
-				renderItem={({ item }) => (
-					<View
-						style={{
-							flexDirection: "row",
-							borderBottomWidth: 1,
-							borderColor: "#ccc",
-							paddingVertical: 10,
-							alignItems: "center",
-						}}
-					>
-						<View style={{ width: 40, alignItems: "center" }}>
-							<MaterialIcons name="manage-accounts" size={24} color="#007BFF" />
+			{loading ? (
+				<ActivityIndicator size="large" color="#0000ff" style={{ marginTop: 20 }} />
+			) : (
+				<FlatList
+					data={pacientesOrdenados}
+					keyExtractor={(_, index) => index.toString()}
+					refreshControl={
+						<RefreshControl refreshing={loading} onRefresh={obtenerPacientes} />
+					}
+					renderItem={({ item }) => (
+						<View
+							style={{
+								flexDirection: "row",
+								borderBottomWidth: 1,
+								borderColor: "#ccc",
+								paddingVertical: 10,
+								alignItems: "center",
+							}}
+						>
+							<View style={{ width: 40, alignItems: "center" }}>
+								<MaterialIcons name="manage-accounts" size={24} color="#007BFF" />
+							</View>
+							<View style={{ width: 40, alignItems: "center" }}>
+								<MaterialIcons name="person-search" size={24} color="#28A745" />
+							</View>
+							<View style={{ flex: 1, alignItems: "center" }}>
+								<Text>{item.nombre}</Text>
+							</View>
+							<View style={{ flex: 1, alignItems: "center" }}>
+								<Text>{item.edad}</Text>
+							</View>
+							<View style={{ flex: 1, alignItems: "center" }}>
+								<Text>{item.rut}</Text>
+							</View>
+							<View style={{ flex: 1, alignItems: "center" }}>
+								<Text>{item.prestacion}</Text>
+							</View>
+							<View style={{ flex: 1, alignItems: "center" }}>
+								<Text>{item.prevision}</Text>
+							</View>
+							<View style={{ flex: 1, alignItems: "center" }}>
+								<Text>{item.nota}</Text>
+							</View>
 						</View>
-						<View style={{ width: 40, alignItems: "center" }}>
-							<MaterialIcons name="person-search" size={24} color="#28A745" />
-						</View>
-						<View style={{ flex: 1, alignItems: "center" }}>
-							<Text>{item.nombre}</Text>
-						</View>
-						<View style={{ flex: 1, alignItems: "center" }}>
-							<Text>{item.edad}</Text>
-						</View>
-						<View style={{ flex: 1, alignItems: "center" }}>
-							<Text>{item.rut}</Text>
-						</View>
-						<View style={{ flex: 1, alignItems: "center" }}>
-							<Text>{item.prestacion}</Text>
-						</View>
-						<View style={{ flex: 1, alignItems: "center" }}>
-							<Text>{item.prevision}</Text>
-						</View>
-						<View style={{ flex: 1, alignItems: "center" }}>
-							<Text>{item.nota}</Text>
-						</View>
-					</View>
-				)}
-			/>
+					)}
+				/>
+			)}
 		</View>
 	);
 }
