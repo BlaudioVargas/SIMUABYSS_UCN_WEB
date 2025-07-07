@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { View, Text, TextInput, Button, Image, ImageBackground, StyleSheet, useWindowDimensions,Dimensions  } from 'react-native';
 import { useRouter } from 'expo-router';
-import { validarCredenciales } from './src/validacion';
+import { validarCredenciales } from './api/api';
 
 class BlackBox {
   private usuario: string;
   private clave: string;
+  private rut: string;
+  private clavemaestra: string;
 
   constructor() {
     this.usuario = '';
     this.clave = '';
+    this.rut = '';
+    this.clavemaestra = '';
   }
 
   setUsuario(usuario: string) {
@@ -20,6 +24,14 @@ class BlackBox {
     this.clave = clave;
   }
 
+  setRut(rut: string) {
+    this.rut = rut;
+  }
+
+  setClaveMaestra(clavemaestra: string) {
+    this.clavemaestra = clavemaestra;
+  }
+
   getUsuario(): string {
     return this.usuario;
   }
@@ -27,7 +39,16 @@ class BlackBox {
   getClave(): string {
     return this.clave;
   }
+
+  getRut(): string {
+    return this.rut;
+  }
+
+  getClaveMaestra(): string {
+    return this.clavemaestra;
+  }
 }
+
 
 const blackbox = new BlackBox();
 
@@ -46,19 +67,27 @@ export default function HomeScreen() {
     blackbox.setClave(clave);
 
     try {
-      const resultado = await validarCredenciales(blackbox.getUsuario(), blackbox.getClave());
+      const res = await validarCredenciales(blackbox.getUsuario(), blackbox.getClave());
 
-      if (resultado === 1) {
+      if (res.resultado === 1) {
+        blackbox.setRut(res.rut);
+        blackbox.setClaveMaestra(res.clavemaestra);
         setMensajeError('');
         router.push({
           pathname: '/layout',
-          params: { usuario: blackbox.getUsuario(), clave: blackbox.getClave() }
+          params: {
+            usuario: blackbox.getUsuario(),
+            clave: blackbox.getClave(),
+            rut: blackbox.getRut(),
+            clavemaestra: blackbox.getClaveMaestra(),
+          }
         });
-      } else if (resultado === 2) {
+      } else if (res.resultado === 2) {
         setMensajeError("Usuario incorrecto");
-      } else if (resultado === 3) {
+      } else if (res.resultado === 3) {
         setMensajeError("Contraseña incorrecta");
       }
+
     } catch (error) {
       setMensajeError("Error inesperado al iniciar sesión");
       console.error("Error en la autenticación:", error);

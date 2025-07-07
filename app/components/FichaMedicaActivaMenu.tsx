@@ -1,7 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, TextInput, Button, ScrollView } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { fetchFichas } from '../api/api';
+import {
+  fetchFichas,
+  fetchPautasMedicas,
+  asignarPautaMedica,
+} from '../api/api';
 import { styles } from '../grafico/grafico';
 import { useLocalSearchParams } from 'expo-router';
 
@@ -33,8 +37,10 @@ const FechaSelector = ({
   const meses = Array.from({ length: 12 }, (_, i) => i + 1);
   const dias = Array.from({ length: obtenerDiasDelMes(mes, anio) }, (_, i) => i + 1);
 
-  React.useEffect(() => {
-    const fechaFormateada = `${anio}-${mes.toString().padStart(2, '0')}-${dia.toString().padStart(2, '0')}`;
+  useEffect(() => {
+    const fechaFormateada = `${anio}-${mes.toString().padStart(2, '0')}-${dia
+      .toString()
+      .padStart(2, '0')}`;
     onChange(fechaFormateada);
   }, [anio, mes, dia]);
 
@@ -77,6 +83,9 @@ export const FichaMedicaActivaMenu = () => {
   const [medicalDataState, setMedicalDataState] = useState<CampoMedico[][]>([]);
   const [documentoSeleccionadoIndex, setDocumentoSeleccionadoIndex] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [pautas, setPautas] = useState<any[]>([]);
+  const [pautaSeleccionadaId, setPautaSeleccionadaId] = useState<string | null>(null);
+  const [datosPauta, setDatosPauta] = useState<[string, string, string][]>([]); // [nombre, tipo, valor]
 
   useEffect(() => {
     if (!usuario || !clave) return;
@@ -93,6 +102,10 @@ export const FichaMedicaActivaMenu = () => {
         setMedicalDataState([]);
       })
       .finally(() => setLoading(false));
+
+    fetchPautasMedicas()
+      .then(setPautas)
+      .catch((err) => console.warn('⚠️ Error cargando pautas médicas', err));
   }, [usuario, clave]);
 
   if (loading) return <Text>Cargando ficha médica...</Text>;
@@ -100,23 +113,58 @@ export const FichaMedicaActivaMenu = () => {
 
   const documentoActual = medicalDataState[documentoSeleccionadoIndex];
 
-  const handleValorChange = (nombreCampo: string, nuevoValor: string) => {
-    const nuevosDocumentos = [...medicalDataState];
-    nuevosDocumentos[documentoSeleccionadoIndex] = nuevosDocumentos[documentoSeleccionadoIndex].map((campo) =>
-      campo.nombre === nombreCampo ? { ...campo, valor: nuevoValor } : campo
-    );
-    setMedicalDataState(nuevosDocumentos);
-  };
+  // Construimos set con nombres de campos editables según datosPauta (que contiene los campos de la pauta)
+  // El formato esperado de datosPauta es: [nombreCampo, tipo, valor]
+  const camposEditables = new Set(datosPauta.map(([nombre]) => nombre));
 
-  const handleSave = () => {
-    console.log('Documento guardado:', medicalDataState[documentoSeleccionadoIndex]);
-  };
-
+  // Organizar campos por seccion y ordenar para que "Anotaciones" esté al final
   const datosPorSeccion: { [key: string]: CampoMedico[] } = {};
   documentoActual.forEach((campo) => {
     if (!datosPorSeccion[campo.seccion]) datosPorSeccion[campo.seccion] = [];
     datosPorSeccion[campo.seccion].push(campo);
   });
+
+  const seccionesOrdenadas = Object.entries(datosPorSeccion).sort(([a], [b]) => {
+    if (a === 'Anotaciones') return 1;
+    if (b === 'Anotaciones') return -1;
+    return a.localeCompare(b);
+  });
+
+  const handleValorChange = (nombreCampo: string, nuevoValor: string) => {
+    const nuevosDocumentos = [...medicalDataState];
+    nuevosDocumentos[documentoSeleccionadoIndex] = nuevosDocumentos[documentoSeleccionadoIndex].map(
+      (campo) =>
+        campo.nombre === nombreCampo
+          ? {
+              ...campo,
+              valor: nuevoValor,
+            }
+          : campo
+    );
+    setMedicalDataState(nuevosDocumentos);
+  };
+
+  const handleSave = async () => {
+    const rut = (usuario || '').toString();
+    const ficha = medicalDataState[documentoSeleccionadoIndex];
+    const idFicha = ficha.find((f) => f.nombre === 'ID Documento')?.valor;
+
+    if (!idFicha) {
+      console.warn('⚠️ No se encontró ID de ficha');
+      return;
+    }
+
+    if (pautaSeleccionadaId) {
+      try {
+        const res = await asignarPautaMedica(rut, idFicha, pautaSeleccionadaId, datosPauta);
+        console.log('✅ Pauta médica asignada:', res);
+      } catch (error) {
+        console.error('❌ Error asignando pauta médica:', error);
+      }
+    }
+
+    console.log('✅ Documento guardado:', ficha);
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -143,16 +191,18 @@ export const FichaMedicaActivaMenu = () => {
         </Picker>
       </View>
 
-      {Object.entries(datosPorSeccion).map(([seccionNombre, campos]) => (
+      {/* Mostrar campos por sección */}
+      {seccionesOrdenadas.map(([seccionNombre, campos]) => (
         <View key={seccionNombre} style={styles.card}>
           <Text style={{ fontWeight: 'bold', marginBottom: 10 }}>{seccionNombre}</Text>
           {campos.map((campo) => {
+            const esEditable = camposEditables.has(campo.nombre);
             const matchSeleccion = campo.tipo.match(/^Selección\s*\((.*?)\)$/i);
             const isFecha = campo.tipo.toLowerCase().startsWith('fecha');
             const isTexto = campo.tipo.toLowerCase() === 'texto';
             const isNumerico = campo.tipo.toLowerCase().includes('numérico');
 
-            if (matchSeleccion) {
+            if (matchSeleccion && esEditable) {
               const opciones = matchSeleccion[1].split('/').map((opt) => opt.trim());
               return (
                 <View key={campo.nombre} style={{ marginBottom: 10 }}>
@@ -170,13 +220,17 @@ export const FichaMedicaActivaMenu = () => {
               );
             }
 
-            if (isFecha) {
+            if (isFecha && esEditable) {
               return (
-                <FechaSelector key={campo.nombre} campo={campo} onChange={(valor) => handleValorChange(campo.nombre, valor)} />
+                <FechaSelector
+                  key={campo.nombre}
+                  campo={campo}
+                  onChange={(valor) => handleValorChange(campo.nombre, valor)}
+                />
               );
             }
 
-            if (isNumerico) {
+            if (isNumerico && esEditable) {
               return (
                 <View key={campo.nombre} style={{ marginBottom: 10 }}>
                   <Text style={{ marginBottom: 4 }}>{campo.nombre}:</Text>
@@ -196,7 +250,7 @@ export const FichaMedicaActivaMenu = () => {
               );
             }
 
-            if (isTexto) {
+            if (isTexto && esEditable) {
               return (
                 <View key={campo.nombre} style={{ marginBottom: 10 }}>
                   <Text style={{ marginBottom: 4 }}>{campo.nombre}:</Text>
@@ -215,6 +269,7 @@ export const FichaMedicaActivaMenu = () => {
               );
             }
 
+            // Campo visible solo (no editable)
             return (
               <View key={campo.nombre} style={{ marginBottom: 6 }}>
                 <Text>
@@ -225,6 +280,59 @@ export const FichaMedicaActivaMenu = () => {
           })}
         </View>
       ))}
+
+      {/* Selector de pautas */}
+      <View style={{ marginBottom: 20 }}>
+        <Text style={{ fontWeight: 'bold' }}>Asignar Pauta Médica:</Text>
+        <Picker
+          selectedValue={pautaSeleccionadaId}
+          onValueChange={(itemValue) => {
+            setPautaSeleccionadaId(itemValue);
+            const pauta = pautas.find((p) => p.id === itemValue);
+            if (pauta) {
+              // Suponiendo que pauta.datos es un arreglo con los campos de la pauta [nombre, tipo, valorInicial]
+              setDatosPauta(pauta.datos || []);
+            } else {
+              setDatosPauta([]);
+            }
+          }}
+        >
+          <Picker.Item label="Seleccionar pauta..." value={null} />
+          {pautas.map((p) => (
+            <Picker.Item key={p.id} label={p.nombre} value={p.id} />
+          ))}
+        </Picker>
+      </View>
+
+      {/* Mostrar datos editables de la pauta */}
+      {pautaSeleccionadaId && (
+        <View style={styles.card}>
+          <Text style={{ fontWeight: 'bold' }}>Datos de la pauta</Text>
+          {datosPauta.map(([nombre, tipo, valor], index) => (
+            <View key={index} style={{ marginBottom: 10 }}>
+              <Text>
+                {nombre} ({tipo}):
+              </Text>
+              <TextInput
+                value={valor}
+                onChangeText={(text) => {
+                  const nuevosDatos = [...datosPauta];
+                  nuevosDatos[index][2] = text; // Aquí se actualiza el valor
+                  setDatosPauta(nuevosDatos);
+                }}
+                style={{
+                  backgroundColor: '#fff',
+                  borderRadius: 6,
+                  padding: 8,
+                  borderWidth: 1,
+                  borderColor: '#ccc',
+                }}
+              />
+            </View>
+          ))}
+        </View>
+      )}
+
 
       <Button title="Guardar Documento" onPress={handleSave} color="#4CAF50" />
     </ScrollView>
