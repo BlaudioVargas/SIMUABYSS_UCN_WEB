@@ -25,9 +25,9 @@ export const useEnviarPaciente = () => {
 			acc[campo] = paciente[campo];
 			return acc;
 		}, {} as Record<string, any>);
-
+		console.log(payload)
 		try {
-			const response = await fetch(`${urlbackend}/users`, {
+			const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/users`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

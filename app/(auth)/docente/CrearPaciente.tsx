@@ -83,7 +83,7 @@ export default function CrearPaciente() {
 
       
       <TouchableOpacity style={styles.boton} onPress={handleImprimirPaciente}>
-        <Text style={styles.textoBoton}>Imprimir paciente</Text>
+        <Text style={styles.textoBoton}>Agregar paciente</Text>
       </TouchableOpacity>
     </ScrollView>
   );
