@@ -1,222 +1,222 @@
-import { useState } from 'react';
-import { View, Text, TextInput, Button, Image, ImageBackground, StyleSheet, useWindowDimensions,Dimensions  } from 'react-native';
-import { useRouter } from 'expo-router';
-import { validarCredenciales } from './api/api';
+import { useAuth } from '@/components/AuthContext';
+import { router } from 'expo-router';
+import React, { useState , useEffect} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  ImageBackground,
+  KeyboardAvoidingView,
+  Platform,
+  Dimensions,
+} from 'react-native';
+import { useGoogleAuth } from '@/hooks/useGoogleAuth';
 
-class BlackBox {
-  private usuario: string;
-  private clave: string;
-  private rut: string;
-  private clavemaestra: string;
+const { width } = Dimensions.get('window');
 
-  constructor() {
-    this.usuario = '';
-    this.clave = '';
-    this.rut = '';
-    this.clavemaestra = '';
-  }
+export default function LoginScreen() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [loggedIn, setLoggedIn] = useState(false);
+  const { user, login } = useAuth();
+  const { promptAsync, request } = useGoogleAuth();
 
-  setUsuario(usuario: string) {
-    this.usuario = usuario;
-  }
-
-  setClave(clave: string) {
-    this.clave = clave;
-  }
-
-  setRut(rut: string) {
-    this.rut = rut;
-  }
-
-  setClaveMaestra(clavemaestra: string) {
-    this.clavemaestra = clavemaestra;
-  }
-
-  getUsuario(): string {
-    return this.usuario;
-  }
-
-  getClave(): string {
-    return this.clave;
-  }
-
-  getRut(): string {
-    return this.rut;
-  }
-
-  getClaveMaestra(): string {
-    return this.clavemaestra;
-  }
-}
-
-
-const blackbox = new BlackBox();
-
-export default function HomeScreen() {
-  const [usuario, setUsuario] = useState('');
-  const [clave, setClave] = useState('');
-  const [mensajeError, setMensajeError] = useState('');
-  const router = useRouter();
-  
-  // Obtener dimensiones de la ventana para determinar la orientación
-  const { width, height } = useWindowDimensions();
-  const isPortrait = height > width;  // Si la altura es mayor que el ancho, estamos en vertical
-
-  const iniciarSesion = async () => {
-    blackbox.setUsuario(usuario);
-    blackbox.setClave(clave);
-
-    try {
-      const res = await validarCredenciales(blackbox.getUsuario(), blackbox.getClave());
-
-      if (res.resultado === 1) {
-        blackbox.setRut(res.rut);
-        blackbox.setClaveMaestra(res.clavemaestra);
-        setMensajeError('');
-        router.push({
-          pathname: '/layout',
-          params: {
-            usuario: blackbox.getUsuario(),
-            clave: blackbox.getClave(),
-            rut: blackbox.getRut(),
-            clavemaestra: blackbox.getClaveMaestra(),
-          }
-        });
-      } else if (res.resultado === 2) {
-        setMensajeError("Usuario incorrecto");
-      } else if (res.resultado === 3) {
-        setMensajeError("Contraseña incorrecta");
-      }
-
-    } catch (error) {
-      setMensajeError("Error inesperado al iniciar sesión");
-      console.error("Error en la autenticación:", error);
-    }
+  const handleLogin = async () => {
+    await login(username, password);
+    setLoggedIn(true);
+    console.log('Usuario:', username);
+    console.log('Contraseña:', password);
   };
 
+
+  const handleGoogleLogin = async () => {
+    await promptAsync();
+    setLoggedIn(true);
+  }
+
+
+  const GoogleLoginButton = () => (
+    <TouchableOpacity
+      style={[styles.googleButton, !request && styles.disabled]}
+      onPress={handleGoogleLogin}
+      disabled={!request}
+    >
+      <Image
+        source={{
+          uri: 'https://img.icons8.com/?size=100&id=V5cGWnc9R4xj&format=png&color=000000',
+        }}
+        style={styles.googleIcon}
+      />
+      <Text style={styles.googleButtonText}>Iniciar sesión con Google</Text>
+    </TouchableOpacity>
+  );
+
+
+
   return (
-    <View style={{ flex: 1 }}>
-      {/* Cambiar el orden de las vistas según la orientación */}
-      {isPortrait ? (
-        // Pantalla vertical
-        <View style={{ flex: 1 }}>
-          {/* Parte superior - Celeste */}
-          <ImageBackground
-              source={{ uri: 'https://www.noticias.ucn.cl/wp-content/uploads/2022/03/WhatsApp-Image-2022-03-21-at-1.44.47-PM.jpeg' }}
-              style={{
-                width: '100%',   // Ocupa todo el ancho de la pantalla
-                height: 300,     // Altura fija
-                justifyContent: 'center', // Asegura que el contenido se centre en la pantalla
-              }}
-              resizeMode="cover"
-            >
-              {/* Overlay translúcido celeste */}
-              <View style={{
-                ...StyleSheet.absoluteFillObject,
-                backgroundColor: 'rgba(135, 206, 250, 0.6)',  // Color translúcido
-                justifyContent: 'center',
-                alignItems: 'center',
-                paddingTop: 50, // Asegura que el contenido no quede pegado a la parte superior
-              }}>
-                {/* Escudo en la esquina superior izquierda */}
-                <Image
-                  source={{ uri: 'https://ucnold.ucn.cl/wp-content/uploads/2018/05/Escudo-UCN-Full-Color.png' }}
-                  style={{
-                    width: 100,               // Ancho del escudo
-                    height: 100,              // Alto del escudo
-                    resizeMode: 'contain',    // Asegura que no se distorsione
-                    position: 'absolute',     // Posiciona la imagen libremente
-                    top: 0,                   // En la parte superior
-                    left: 0,                  // A la izquierda
-                  }}
-                />
-
-                {/* Texto ajustable al 80% del ancho */}
-                <Text style={{
-                  fontSize: width * 0.1,     // Ajusta el tamaño del texto al 10% del ancho de la pantalla
-                  fontWeight: 'bold',
-                  color: 'white',
-                  marginTop: 120,            // Espacio desde el escudo
-                  textAlign: 'center',      // Centra el texto
-                  width: '80%',             // El texto ocupará el 80% del ancho
-                }}>
-                  SimuAbyssUCN
-                </Text>
-              </View>
-            </ImageBackground>
-
-          {/* Parte inferior - Azul con imagen */}
-          <View style={{ flex: 1, backgroundColor: '#00008B', justifyContent: 'center', alignItems: 'center' }}>
-            
-            <TextInput
-              placeholder="Usuario"
-              value={usuario}
-              onChangeText={setUsuario}
-              style={{ width: 200, height: 40, borderBottomWidth: 1, marginBottom: 10, backgroundColor: 'white' }}
-            />
-            <TextInput
-              placeholder="Clave"
-              value={clave}
-              onChangeText={setClave}
-              secureTextEntry
-              style={{ width: 200, height: 40, borderBottomWidth: 1, marginBottom: 10, backgroundColor: 'white' }}
-            />
-            {mensajeError !== '' && <Text style={{ color: 'red', marginBottom: 10 }}>{mensajeError}</Text>}
-            {/* Botón con estilo personalizado */}
-            <View style={{ width: 250, backgroundColor: 'gray', borderRadius: 5 }}>
-              <Button title="LOGIN" onPress={iniciarSesion} color="grey" />
-            </View>
-          </View>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+    >
+      {/* Parte Izquierda */}
+      <ImageBackground
+        source={{
+          uri: 'https://www.noticias.ucn.cl/wp-content/uploads/2022/03/WhatsApp-Image-2022-03-21-at-1.44.47-PM.jpeg',
+        }}
+        style={styles.leftPanel}
+        resizeMode="cover"
+      >
+        <View style={styles.overlay}>
+          <Image
+            source={{
+              uri: 'https://ucnold.ucn.cl/wp-content/uploads/2018/05/Escudo-UCN-Full-Color.png',
+            }}
+            style={styles.logo}
+            resizeMode="contain"
+          />
+          <Text style={styles.tagline}>
+            Bienvenido a SIMUABYSS UCN{"\n"}
+            El motivo de esta aplicación es familiarizar a los estudiantes de medicina de la UCN con
+            el uso de sistemas clínicos reales como AVIS, mediante una simulación práctica y educativa.
+          </Text>
         </View>
-        
-      ) : (
-        // Pantalla horizontal
-        <View style={{ flex: 1, flexDirection: 'row' }}>
-          {/* Parte izquierda - Azul */}
-          <View style={{ flex: 0.9, backgroundColor: '#00008B', justifyContent: 'center', alignItems: 'center' }}>
-            <Text style={{ fontSize: width * 0.05, fontWeight: 'bold', color: 'white', marginBottom: 20 ,width: '80%', }}>SimuAbyssUCN</Text>
-            <TextInput
-              placeholder="Usuario"
-              value={usuario}
-              onChangeText={setUsuario}
-              style={{ width: 200, height: 40, borderBottomWidth: 1, marginBottom: 10, backgroundColor: 'white' }}
-            />
-            <TextInput
-              placeholder="Clave"
-              value={clave}
-              onChangeText={setClave}
-              secureTextEntry
-              style={{ width: 200, height: 40, borderBottomWidth: 1, marginBottom: 10, backgroundColor: 'white' }}
-            />
-            {mensajeError !== '' && <Text style={{ color: 'red', marginBottom: 10 }}>{mensajeError}</Text>}
-            {/* Botón con estilo personalizado */}
-            <View style={{ width: 250, backgroundColor: 'gray', borderRadius: 5 }}>
-              <Button title="LOGIN" onPress={iniciarSesion} color="grey" />
-            </View>
-          </View>
+      </ImageBackground>
 
-          {/* Parte derecha - Fondo con imagen y overlay celeste + escudo */}
-          <ImageBackground
-            source={{ uri: 'https://www.noticias.ucn.cl/wp-content/uploads/2022/03/WhatsApp-Image-2022-03-21-at-1.44.47-PM.jpeg' }}
-            style={{ flex: 1 }}
-            resizeMode="cover"
-          >
-            {/* Overlay translúcido celeste */}
-            <View style={{
-              ...StyleSheet.absoluteFillObject,
-              backgroundColor: 'rgba(135, 206, 250, 0.6)',
-              justifyContent: 'center',
-              alignItems: 'center'
-            }}>
-              {/* Escudo centrado */}
-              <Image
-                source={{ uri: 'https://ucnold.ucn.cl/wp-content/uploads/2018/05/Escudo-UCN-Full-Color.png' }}
-                style={{ width: width * 0.4, height: 700, resizeMode: 'contain' }}
-              />
-            </View>
-          </ImageBackground>
+      {/* Parte Derecha */}
+      <View style={styles.rightPanel}>
+        <View style={styles.card}>
+          <Text style={styles.title}>Iniciar Sesión</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="ejemplo@alumnos.ucn.cl o ejemplo@ucn.cl"
+            placeholderTextColor="#aaa"
+            value={username}
+            onChangeText={setUsername}
+          />
+
+          <TextInput
+            style={styles.input}
+            placeholder="Contraseña"
+            placeholderTextColor="#aaa"
+            secureTextEntry
+            value={password}
+            onChangeText={setPassword}
+          />
+
+          <TouchableOpacity style={styles.button} onPress={handleLogin}>
+            <Text style={styles.buttonText}>Entrar</Text>
+          </TouchableOpacity>
+
+          {/* Botón de Google */}
+          <GoogleLoginButton />
         </View>
-      )}
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    flexDirection: width >= 768 ? 'row' : 'column',
+  },
+  leftPanel: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  overlay: {
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    padding: 30,
+    borderRadius: 16,
+    alignItems: 'center',
+  },
+  logo: {
+    width: 120,
+    height: 120,
+    marginBottom: 20,
+  },
+  tagline: {
+    color: 'white',
+    fontSize: 20,
+    fontWeight: '600',
+    textAlign: 'center',
+  },
+  rightPanel: {
+    flex: 1,
+    backgroundColor: '#1E3A8A',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: 'white',
+    padding: 25,
+    borderRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    elevation: 8,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    marginBottom: 20,
+    alignSelf: 'center',
+    color: '#333',
+  },
+  input: {
+    height: 50,
+    borderColor: '#ddd',
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    marginBottom: 15,
+    fontSize: 16,
+    backgroundColor: '#fafafa',
+  },
+  button: {
+    backgroundColor: '#4682B4',
+    paddingVertical: 15,
+    borderRadius: 12,
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  googleButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+    justifyContent: 'center',
+  },
+  googleIcon: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
+  },
+  googleButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#444',
+  },
+  disabled: {
+    opacity: 0.5,
+  },
+});
