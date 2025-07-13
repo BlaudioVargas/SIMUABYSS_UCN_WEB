@@ -1,50 +1,63 @@
 import { useState, useEffect } from "react";
 import { Alert } from "react-native";
-import { useAuth } from "@/components/AuthContext"; // ajusta el path si es necesario
+import { useAuth } from "@/components/AuthContext";
 
-const urlbackend = "http://localhost:3000"; // reemplaza con tu IP local
+const urlbackend = "http://localhost:3000";
+
+export type Paciente = {
+  id: number;
+  nombres: string;
+  apellidoPaterno: string;
+  apellidoMaterno?: string;
+  rut: string;
+  email?: string;
+  fechaNacimiento?: string;
+};
 
 export const useObtenerPacientes = () => {
-	const { accessToken } = useAuth();
-	const [pacientes, setPacientes] = useState<any[]>([]);
-	const [loading, setLoading] = useState(false);
+  const { accessToken } = useAuth();
+  const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-	const obtenerPacientes = async () => {
-		if (!accessToken) {
-			Alert.alert("Error", "No hay token disponible. Inicia sesión.");
-			return;
-		}
+  const obtenerPacientes = async () => {
+    if (!accessToken) {
+      Alert.alert("Error", "No hay token disponible. Inicia sesión.");
+      setError("Token no disponible");
+      return;
+    }
 
-		setLoading(true);
+    setLoading(true);
+    setError(null);
 
-		try {
-			const response = await fetch(`${urlbackend}/users`, {
-				headers: {
-					"Content-Type": "application/json",
-					Authorization: `Bearer ${accessToken}`,
-				},
-			});
+    try {
+      const response = await fetch(`${urlbackend}/users`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${accessToken}`,
+        },
+      });
 
-			if (!response.ok) {
-				const errorText = await response.text();
-				console.error("Respuesta con error:", errorText);
-				throw new Error("Error al obtener los pacientes");
-			}
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error("Respuesta con error:", errorText);
+        throw new Error("Error al obtener los pacientes");
+      }
 
-			const data = await response.json();
-			setPacientes(data);
-		} catch (error: any) {
-			console.error("Error:", error);
-			Alert.alert("Error", "No se pudo obtener la lista de pacientes");
-		} finally {
-			setLoading(false);
-		}
-	};
+      const data: Paciente[] = await response.json();
+      setPacientes(data);
+    } catch (error: any) {
+      console.error("Error:", error);
+      setError("No se pudo obtener la lista de pacientes");
+      Alert.alert("Error", "No se pudo obtener la lista de pacientes");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-	// Opcional: auto-cargar al montar
-	useEffect(() => {
-		obtenerPacientes();
-	}, []);
+  useEffect(() => {
+    obtenerPacientes();
+  }, []);
 
-	return { pacientes, loading, obtenerPacientes };
+  return { pacientes, loading, error, obtenerPacientes };
 };
