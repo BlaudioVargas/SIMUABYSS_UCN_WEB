@@ -1,116 +1,44 @@
 import React, { useState } from "react";
-import { View, Text, Pressable, StyleSheet, Image } from "react-native";
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Modal,
+} from "react-native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { router, Slot } from "expo-router";
 import { useAuth } from "@/components/AuthContext";
+import AyudaOverlay from "../components/AyudaOverlay";
 
 export default function AuthLayout() {
   const { user, logout } = useAuth();
   const [botonActivo, setBotonActivo] = useState("login");
+  const [ayudaVisible, setAyudaVisible] = useState(false); // ✅ Estado para mostrar la ayuda
 
-const botones = [
-  // === DOCENTE ===
-  {
-    key: "HistorialMenu",
-    titulo: "Historial",
-    icon: "person-search",
-    roles: ["docente"],
-  },
-  {
-    key: "CrearPaciente",
-    titulo: "Paciente",
-    icon: "person-add",
-    roles: ["docente"],
-  },
-  {
-    key: "AgendarPaciente",
-    titulo: "Agendar",
-    icon: "event-available",
-    roles: ["docente"],
-  },
-  {
-    key: "CrearPauta",
-    titulo: "Crear Pauta",
-    icon: "assignment",
-    roles: ["docente"],
-  },
-  {
-    key: "ListaPautas",
-    titulo: "Ver Pautas",
-    icon: "list",
-    roles: ["docente"],
-  },
-  {
-    key: "AplicarPauta",
-    titulo: "Aplicar Pauta",
-    icon: "fact-check",
-    roles: ["docente"],
-  },
-  {
-    key: "EvaluacionesRealizadas",
-    titulo: "Evaluaciones",
-    icon: "grading",
-    roles: ["docente"],
-  },
-  {
-    key: "CrearFichaClinica",
-    titulo: "Crear Ficha Clínica",
-    icon: "note-add",
-    roles: ["docente"],
-  },
-  {
-    key: "ListaFichasClinicas",
-    titulo: "Fichas Clínicas",
-    icon: "folder-shared",
-    roles: ["docente"],
-  },
-  {
-    key: "CrearHistoriaClinica",
-    titulo: "Historia Clínica",
-    icon: "library-add",
-    roles: ["docente"],
-  },
-
-  // === AMBOS ===
-  {
-    key: "BuscarFichaMedicaActivaMenu",
-    titulo: "Buscar Ficha Médica",
-    icon: "search",
-    roles: ["estudiante", "docente"],
-  },
-
-  // === ESTUDIANTE ===
-  {
-    key: "AtenderPaciente",
-    titulo: "Atender",
-    icon: "medical-services",
-    roles: ["estudiante"],
-  },
-  {
-    key: "VerFichaClinica",
-    titulo: "Mi Ficha Clínica",
-    icon: "folder-open",
-    roles: ["estudiante"],
-  },
-  {
-    key: "VerAtencion",
-    titulo: "Mis Atenciones",
-    icon: "medical-information",
-    roles: ["estudiante"],
-  },
-  {
-    key: "EvaluacionesRecibidas",
-    titulo: "Mis Evaluaciones",
-    icon: "emoji-events",
-    roles: ["estudiante"],
-  },
-  {
-    key: "VerPautaAplicada",
-    titulo: "Detalle Evaluación",
-    icon: "assignment-turned-in",
-    roles: ["estudiante"],
-  },
-];
+  const botones = [
+    // === DOCENTE ===
+    { key: "HistorialMenu", titulo: "Historial", icon: "person-search", roles: ["docente"] },
+    { key: "CrearPaciente", titulo: "Paciente", icon: "person-add", roles: ["docente"] },
+    { key: "AgendarPaciente", titulo: "Agendar", icon: "event-available", roles: ["docente"] },
+    { key: "CrearPauta", titulo: "Crear Pauta", icon: "assignment", roles: ["docente"] },
+    { key: "ListaPautas", titulo: "Ver Pautas", icon: "list", roles: ["docente"] },
+    { key: "AplicarPauta", titulo: "Aplicar Pauta", icon: "fact-check", roles: ["docente"] },
+    { key: "EvaluacionesRealizadas", titulo: "Evaluaciones", icon: "grading", roles: ["docente"] },
+    { key: "CrearFichaClinica", titulo: "Crear Ficha Clínica", icon: "note-add", roles: ["docente"] },
+    { key: "ListaFichasClinicas", titulo: "Fichas Clínicas", icon: "folder-shared", roles: ["docente"] },
+    { key: "CrearHistoriaClinica", titulo: "Historia Clínica", icon: "library-add", roles: ["docente"] },
+    // === AMBOS ===
+    { key: "BuscarFichaMedicaActivaMenu", titulo: "Buscar Ficha Médica", icon: "search", roles: ["estudiante", "docente"] },
+    // === ESTUDIANTE ===
+    { key: "AtenderPaciente", titulo: "Atender", icon: "medical-services", roles: ["estudiante"] },
+    { key: "VerFichaClinica", titulo: "Mi Ficha Clínica", icon: "folder-open", roles: ["estudiante"] },
+    { key: "VerAtencion", titulo: "Mis Atenciones", icon: "medical-information", roles: ["estudiante"] },
+    { key: "EvaluacionesRecibidas", titulo: "Mis Evaluaciones", icon: "emoji-events", roles: ["estudiante"] },
+    { key: "VerPautaAplicada", titulo: "Detalle Evaluación", icon: "assignment-turned-in", roles: ["estudiante"] },
+  ];
 
   const handleLogOut = () => {
     logout();
@@ -119,7 +47,7 @@ const botones = [
 
   const handlePress = (key: string) => {
     setBotonActivo(key);
-    console.log(router.push(`./${key}`));
+    router.push(`./${key}`);
   };
 
   const renderButton = (key: string, icon: string, label: string) => (
@@ -136,8 +64,6 @@ const botones = [
   return (
     <View style={styles.contenedor}>
       <View style={styles.lateral}>
-
-        {/* Título con logo y texto */}
         <View style={styles.tituloContainer}>
           <Image
             source={{
@@ -152,8 +78,9 @@ const botones = [
         </View>
 
         {botones
-          .filter(({ roles }) => !roles || roles.includes(user?.role ?? "estudiante")) // 👈 filtra según rol
+          .filter(({ roles }) => !roles || roles.includes(user?.role ?? "estudiante"))
           .map(({ key, icon, titulo }) => renderButton(key, icon, titulo))}
+
         <Pressable
           onPress={handleLogOut}
           style={[styles.boton, { backgroundColor: "darkred", marginTop: 30 }]}
@@ -162,8 +89,33 @@ const botones = [
           <Text style={styles.botonTexto}>Cerrar Sesión</Text>
         </Pressable>
       </View>
+
       <View style={styles.contenido}>
         <Slot />
+
+        {/* Botón flotante "?" */}
+        <TouchableOpacity
+          onPress={() => setAyudaVisible(true)}
+          style={{
+            position: "absolute",
+            bottom: 20,
+            right: 20,
+            backgroundColor: "#000",
+            borderRadius: 25,
+            width: 50,
+            height: 50,
+            justifyContent: "center",
+            alignItems: "center",
+            elevation: 5,
+          }}
+        >
+          <Text style={{ color: "white", fontSize: 24 }}>?</Text>
+        </TouchableOpacity>
+
+        {/* Overlay de ayuda */}
+        <Modal visible={ayudaVisible} animationType="slide" transparent={true}>
+          <AyudaOverlay onCerrar={() => setAyudaVisible(false)} />
+        </Modal>
       </View>
     </View>
   );
