@@ -6,11 +6,12 @@ import { Provider as PaperProvider } from 'react-native-paper';
 import { registerTranslation } from 'react-native-paper-dates';
 import { es } from 'date-fns/locale';
 
-registerTranslation('es', es);
+//registerTranslation('es', es);
 
 
 import { camposDatosPersonales, camposDireccion, camposAdministrativos, CampoFormulario } from '@/constants/constantes';
-import { useEnviarPaciente } from '@/src/conexion_back/paciente-api';
+import { useEnviarPaciente } from '@/hooks/useEnviarPaciente';
+
 
 const camposObligatorios = new Set([
   'nHistoria',
@@ -42,20 +43,20 @@ export default function CrearPaciente() {
   };
 
   const handleImprimirPaciente = async () => {
+    console.log("Paciente a enviar:", paciente);
+    console.log("enviarPacienteAlBackend existe?", !!enviarPacienteAlBackend);
+    
     const nuevosErrores: Record<string, boolean> = {};
+
+    if (paciente.rut && !validarRUT(paciente.rut)) {
+      nuevosErrores.rut = true;
+      Alert.alert('Error', 'El RUT ingresado no es válido');
+    }
 
     for (const campo of camposObligatorios) {
       if (!paciente[campo] || paciente[campo].trim() === '') {
         nuevosErrores[campo] = true;
       }
-    }
-
-    if (!opcionesSexo.includes(paciente.sexo || '')) {
-      nuevosErrores['sexo'] = true;
-    }
-
-    if (!opcionesEstadoCivil.includes(paciente.estadoCivil || '')) {
-      nuevosErrores['estadoCivil'] = true;
     }
 
     if (Object.keys(nuevosErrores).length > 0) {
@@ -64,7 +65,14 @@ export default function CrearPaciente() {
     }
 
     try {
-      await enviarPacienteAlBackend(paciente);
+      const sexoBackend = paciente.sexo === 'Masculino' ? 'M' : 'F';
+      const pacienteParaBackend = {
+        ...paciente,
+        sexo: sexoBackend,
+        rut: paciente.rut,
+      };
+
+      await enviarPacienteAlBackend(pacienteParaBackend);
       Alert.alert('Éxito', 'Paciente guardado exitosamente');
     } catch (error: any) {
       console.log('Error: ', error);
@@ -72,8 +80,38 @@ export default function CrearPaciente() {
     }
   };
 
+
+
+
   const renderCampo = ({ key, label }: CampoFormulario) => {
     const mostrarError = errores[key];
+
+    // Cambiar en renderCampo para 'rut'
+    if (key === 'rut') {
+      return (
+        <View key={key} style={styles.inputContainer}>
+          <Text style={styles.label}>
+            {label}
+            {camposObligatorios.has(key) && <Text style={styles.asterisk}> *</Text>}
+          </Text>
+          <TextInput
+            style={[styles.input, mostrarError && styles.errorInput]}
+            value={formatearRUT(paciente[key] || '')}
+            onChangeText={(text) => {
+              const limpio = text.replace(/[^0-9kK]/g, '').toUpperCase();
+              handleChange(key, limpio);
+            }}
+            placeholder="Ej: 12.345.678-9"
+          />
+          {mostrarError && <Text style={styles.errorText}>Ingrese un RUT válido</Text>}
+        </View>
+      );
+    }
+
+
+
+
+
 
     if (key === 'nHistoria' || key === 'edad') {
       return (
@@ -207,6 +245,73 @@ export default function CrearPaciente() {
     </PaperProvider>
   );
 }
+
+function limpiarRUT(rut: string): string {
+  return rut.replace(/\./g, '').replace(/-/g, '');
+}
+
+
+
+export function validarRUT(rut: string): boolean {
+  // Eliminar puntos y guion y convertir a mayúscula
+  rut = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+
+  // Debe tener al menos 2 caracteres (cuerpo + DV)
+  if (rut.length < 2) return false;
+
+  // Separar cuerpo y dígito verificador
+  const cuerpo = rut.slice(0, -1);
+  const dv = rut.slice(-1);
+
+  // Validar que cuerpo sea solo números
+  if (!/^\d+$/.test(cuerpo)) return false;
+
+  let suma = 0;
+  let multiplo = 2;
+
+  // Calcular suma para el cuerpo
+  for (let i = cuerpo.length - 1; i >= 0; i--) {
+    suma += Number(cuerpo.charAt(i)) * multiplo;
+    multiplo = multiplo < 7 ? multiplo + 1 : 2;
+  }
+
+  const resto = suma % 11;
+  const dvEsperado = 11 - resto;
+
+  let dvCalculado = '';
+  if (dvEsperado === 11) dvCalculado = '0';
+  else if (dvEsperado === 10) dvCalculado = 'K';
+  else dvCalculado = dvEsperado.toString();
+
+  return dvCalculado === dv.toUpperCase();
+}
+
+export function limpiarYValidarRUT(rut: string): boolean {
+  const limpio = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+  return validarRUT(limpio);
+}
+
+function formatearRUT(rut: string): string {
+  rut = rut.replace(/\./g, '').replace(/-/g, '').toUpperCase();
+  if (rut.length < 2) return rut;
+
+  const cuerpo = rut.slice(0, -1);
+  const dv = rut.slice(-1);
+
+  const cuerpoConPuntos = cuerpo
+    .split('')
+    .reverse()
+    .join('')
+    .replace(/(\d{3})(?=\d)/g, '$1.')
+    .split('')
+    .reverse()
+    .join('');
+
+  return `${cuerpoConPuntos}-${dv}`;
+}
+
+
+
 
 const styles = StyleSheet.create({
   container: {

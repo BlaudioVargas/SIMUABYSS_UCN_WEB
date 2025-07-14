@@ -22,22 +22,29 @@ export default function AuthLayout() {
     // === DOCENTE ===
     { key: "HistorialMenu", titulo: "Historial", icon: "person-search", roles: ["docente"] },
     { key: "CrearPaciente", titulo: "Paciente", icon: "person-add", roles: ["docente"] },
-    { key: "AgendarPaciente", titulo: "Agendar", icon: "event-available", roles: ["docente"] },
-    { key: "CrearPauta", titulo: "Crear Pauta", icon: "assignment", roles: ["docente"] },
-    { key: "ListaPautas", titulo: "Ver Pautas", icon: "list", roles: ["docente"] },
-    { key: "AplicarPauta", titulo: "Aplicar Pauta", icon: "fact-check", roles: ["docente"] },
+    ////{ key: "ListarPacientes", titulo: "Paciente", icon: "person-add", roles: ["docente"] },
+    //{ key: "AgendarPaciente", titulo: "Agendar", icon: "event-available", roles: ["docente"] },
+    ////{ key: "CrearPauta", titulo: "Crear Pauta", icon: "assignment", roles: ["docente"] },
+    ////{ key: "ListaPautas", titulo: "Ver Pautas", icon: "list", roles: ["docente"] },
+    
+    //{ key: "AplicarPauta", titulo: "Aplicar Pauta", icon: "fact-check", roles: ["docente"] },
+    
     { key: "EvaluacionesRealizadas", titulo: "Evaluaciones", icon: "grading", roles: ["docente"] },
-    { key: "CrearFichaClinica", titulo: "Crear Ficha Clínica", icon: "note-add", roles: ["docente"] },
-    { key: "ListaFichasClinicas", titulo: "Fichas Clínicas", icon: "folder-shared", roles: ["docente"] },
-    { key: "CrearHistoriaClinica", titulo: "Historia Clínica", icon: "library-add", roles: ["docente"] },
+    
+    { key: "FichaClinicaManager", titulo: "Fichas Clinicas", icon: "person-add", roles: ["docente"] },
+
+    //{ key: "CrearFichaClinica", titulo: "Crear Ficha Clínica", icon: "note-add", roles: ["docente"] },
+    //{ key: "ListaFichasClinicas", titulo: "Fichas Clínicas", icon: "folder-shared", roles: ["docente"] },
+    //{ key: "CrearHistoriaClinica", titulo: "Historia Clínica", icon: "library-add", roles: ["docente"] },
     // === AMBOS ===
-    { key: "BuscarFichaMedicaActivaMenu", titulo: "Buscar Ficha Médica", icon: "search", roles: ["estudiante", "docente"] },
+    //{ key: "BuscarFichaMedicaActivaMenu", titulo: "Buscar Ficha Médica", icon: "search", roles: ["estudiante", "docente"] },
     // === ESTUDIANTE ===
     { key: "AtenderPaciente", titulo: "Atender", icon: "medical-services", roles: ["estudiante"] },
     { key: "VerFichaClinica", titulo: "Mi Ficha Clínica", icon: "folder-open", roles: ["estudiante"] },
     { key: "VerAtencion", titulo: "Mis Atenciones", icon: "medical-information", roles: ["estudiante"] },
     { key: "EvaluacionesRecibidas", titulo: "Mis Evaluaciones", icon: "emoji-events", roles: ["estudiante"] },
     { key: "VerPautaAplicada", titulo: "Detalle Evaluación", icon: "assignment-turned-in", roles: ["estudiante"] },
+    { key: "BuscarFichaMedicaActivaMenu", titulo: "Buscar Ficha Médica", icon: "search", roles: ["estudiante"] },
   ];
 
   const handleLogOut = () => {

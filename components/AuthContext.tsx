@@ -69,7 +69,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 	};
 
 	const loginConGoogle = async (idToken: string) => {
-		const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/google`, {
+		const response = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/auth/register-estudiante`, {
 			method: "POST",
 			headers: { "Content-Type": "application/json" },
 			body: JSON.stringify({ idToken }),
@@ -86,6 +86,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 		setRefreshToken(refreshToken);
 		setUser(user);
 	};
+
 
 	// Redirigir según rol
 	useEffect(() => {

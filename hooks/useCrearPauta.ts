@@ -10,6 +10,8 @@ export function useCrearPauta(token: string | null) {
     descripcion: string;
     categoria: string;
     nivelAcademicoSugerido: string;
+    estructura: object;   // nuevo campo
+    activa: boolean;      // nuevo campo
   }) => {
     if (!token) {
       setError("Token no disponible");
@@ -18,16 +20,17 @@ export function useCrearPauta(token: string | null) {
 
     setLoading(true);
     setError(null);
+
     try {
       const pauta = await crearPauta(token, pautaData);
+      console.log("Pauta creada:", pauta);
       return pauta;
-    } catch (err: any) {
-      setError(err.message || "Error al crear pauta");
-      return null;
-    } finally {
-      setLoading(false);
+    } catch (error) {
+      console.error("Error creando pauta:", error);
+      throw error;
     }
   };
+
 
   return { crear, loading, error };
 }

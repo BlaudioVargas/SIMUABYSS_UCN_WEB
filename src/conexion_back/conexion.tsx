@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000/auth"; //hay que cambiarlo a un .env
+const BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL+"/auth"; //hay que cambiarlo a un .env
 
 type LoginPayload = {
   email: string;

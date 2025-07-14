@@ -5,14 +5,25 @@ import { obtenerFichasClinicas } from "@/app/api/api";
 export interface FichaClinica {
   id: number;
   user: {
+    id: number;
     nombres: string;
     apellidoPaterno: string;
+    apellidoMaterno?: string;
     rut: string;
+    fechaNacimiento?: string;
+    edad?: number;
+    sexo?: string;
+    estadoCivil?: string;
+    direccion?: string;
+    telefonoPersonal?: string;
+    email?: string;
+    prevision?: string;
   };
   observacionesGenerales?: string;
   fechaCreacion: string;
   fechaUltimaAtencion?: string;
 }
+
 
 export function useObtenerFichasClinicas(token: string | null) {
   // 2) Tipamos el estado como FichaClinica[]

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Stack } from 'expo-router';
 import { AuthProvider } from '@/components/AuthContext';
+import AyudaOverlay from './components/AyudaOverlay';
 
 const StackLayout = () => {
   return (
@@ -8,6 +9,7 @@ const StackLayout = () => {
       <Stack.Screen name="index" options={{headerShown: false}}/>
       <Stack.Screen name="(auth)" options={{headerShown: false}}/>
     </Stack>
+    
   )
 }
 

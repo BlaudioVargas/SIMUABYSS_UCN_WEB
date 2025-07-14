@@ -12,7 +12,13 @@ export type Paciente = {
   rut: string;
   email?: string;
   fechaNacimiento?: string;
+
+  edad?: number;            // agregar
+  motivo?: string;          // agregar
+  prevision?: string;       // agregar
+  comentarios?: string;     // agregar, que usas como nota
 };
+
 
 export const useObtenerPacientes = () => {
   const { accessToken } = useAuth();

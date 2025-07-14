@@ -9,45 +9,44 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useBuscarHistoriaClinica } from "@/hooks/useBuscarHistoriaClinica";
+
+import { useBuscarFichaClinicaPorId } from "@/hooks/useBuscarFichaClinicaPorId";
 import FichaClinicaCard from "@/components/FichaClinicaCard";
 
-export default function BuscarFichaMedicaActivaMenu() {
-  const [rut, setRut] = useState("");
-  const { historia, buscar, loading, error } = useBuscarHistoriaClinica();
+export default function BuscarFichaClinicaPorId() {
+  const [id, setId] = useState("");
+  const { ficha, buscarPorId, loading, error } = useBuscarFichaClinicaPorId();
 
   const handleBuscar = () => {
-    if (rut.trim() !== "") {
-      buscar(rut.trim());
-    }
+    if (id.trim() === "") return;
+    buscarPorId(id.trim());
   };
 
   return (
-    <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-      <Text style={styles.title}>Buscar Ficha Médica por RUT</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
+    >
+      <Text style={styles.title}>Buscar Ficha Clínica por ID</Text>
 
       <TextInput
-        placeholder="Ingrese RUT (Ej: 12.345.678-9)"
-        value={rut}
-        onChangeText={setRut}
+        placeholder="Ingrese ID de ficha clínica"
+        keyboardType="numeric"
+        value={id}
+        onChangeText={setId}
         style={styles.input}
-        autoCapitalize="characters"
       />
 
-      <Button title="Buscar" onPress={handleBuscar} disabled={loading || rut.trim() === ""} />
+      <Button title="Buscar" onPress={handleBuscar} disabled={loading || id.trim() === ""} />
 
       {loading && <ActivityIndicator style={{ marginTop: 20 }} />}
 
       {error && <Text style={styles.error}>{error}</Text>}
 
-      {historia?.fichaClinica && (
-        <View style={{ marginTop: 24 }}>
-          <FichaClinicaCard ficha={historia.fichaClinica} />
-        </View>
-      )}
+      {ficha && <FichaClinicaCard ficha={ficha} />}
 
-      {!historia && !loading && rut.trim() !== "" && !error && (
-        <Text style={{ marginTop: 20 }}>No se encontró ficha asociada a ese RUT.</Text>
+      {!ficha && !loading && !error && id.trim() !== "" && (
+        <Text style={{ marginTop: 20 }}>No se encontró ficha clínica con ese ID.</Text>
       )}
     </KeyboardAvoidingView>
   );
@@ -55,13 +54,13 @@ export default function BuscarFichaMedicaActivaMenu() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 20 },
-  title: { fontSize: 20, fontWeight: "bold", marginBottom: 16 },
+  title: { fontSize: 22, fontWeight: "bold", marginBottom: 16 },
   input: {
     borderWidth: 1,
     borderColor: "#ccc",
     padding: 10,
     borderRadius: 6,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   error: { color: "red", marginTop: 16 },
 });

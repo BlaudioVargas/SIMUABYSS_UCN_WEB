@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:3000";
+const BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 
 // Función auxiliar para el fetch con token y JSON
 async function fetchWithAuth(
@@ -14,6 +14,11 @@ async function fetchWithAuth(
     headers["Authorization"] = `Bearer ${token}`;
   }
 
+  console.log("fetchWithAuth - Método:", method);
+  console.log("fetchWithAuth - Endpoint:", endpoint);
+  console.log("fetchWithAuth - Headers:", headers);
+  if (body) console.log("fetchWithAuth - Body:", body);
+
   const options: RequestInit = {
     method,
     headers,
@@ -24,6 +29,7 @@ async function fetchWithAuth(
   }
 
   const res = await fetch(BASE_URL + endpoint, options);
+
   if (!res.ok) {
     const errorBody = await res.text();
     throw new Error(`Error ${res.status}: ${errorBody}`);
@@ -33,6 +39,7 @@ async function fetchWithAuth(
 
   return await res.json();
 }
+
 
 // --- AUTH ---
 // Login y register
@@ -158,15 +165,24 @@ export async function crearFichaClinica(
     fechaUltimaAtencion?: string;
   }
 ) {
-  return await fetchWithAuth("/ficha-clinica", "POST", token, data);
+  console.log("crearFichaClinica - Datos enviados:", data);
+  const resultado = await fetchWithAuth("/ficha-clinica", "POST", token, data);
+  console.log("crearFichaClinica - Resultado recibido:", resultado);
+  return resultado;
 }
 
 export async function obtenerFichasClinicas(token: string) {
-  return await fetchWithAuth("/ficha-clinica", "GET", token);
+  console.log("obtenerFichasClinicas - Token:", token);
+  const resultado = await fetchWithAuth("/ficha-clinica", "GET", token);
+  console.log("obtenerFichasClinicas - Resultado recibido:", resultado);
+  return resultado;
 }
 
 export async function obtenerFichaClinicaPorId(token: string, id: number) {
-  return await fetchWithAuth(`/ficha-clinica/${id}`, "GET", token);
+  console.log(`obtenerFichaClinicaPorId - Id: ${id}, Token:`, token);
+  const resultado = await fetchWithAuth(`/ficha-clinica/${id}`, "GET", token);
+  console.log("obtenerFichaClinicaPorId - Resultado recibido:", resultado);
+  return resultado;
 }
 
 export async function actualizarFichaClinica(
@@ -177,25 +193,41 @@ export async function actualizarFichaClinica(
     fechaUltimaAtencion?: string;
   }
 ) {
-  return await fetchWithAuth(`/ficha-clinica/${id}`, "PUT", token, data);
+  console.log(`actualizarFichaClinica - Id: ${id}, Datos:`, data);
+  const resultado = await fetchWithAuth(`/ficha-clinica/${id}`, "PUT", token, data);
+  console.log("actualizarFichaClinica - Resultado recibido:", resultado);
+  return resultado;
 }
 
 export async function eliminarFichaClinica(token: string, id: number) {
-  return await fetchWithAuth(`/ficha-clinica/${id}`, "DELETE", token);
+  console.log(`eliminarFichaClinica - Id: ${id}, Token:`, token);
+  const resultado = await fetchWithAuth(`/ficha-clinica/${id}`, "DELETE", token);
+  console.log("eliminarFichaClinica - Resultado recibido:", resultado);
+  return resultado;
 }
 
 // --- HISTORIA CLINICA ---
 export async function crearHistoriaClinica(token: string, fichaClinicaId: number) {
-  return await fetchWithAuth("/historia-clinica", "POST", token, { fichaClinicaId });
+  console.log("crearHistoriaClinica - fichaClinicaId:", fichaClinicaId);
+  const resultado = await fetchWithAuth("/historia-clinica", "POST", token, { fichaClinicaId });
+  console.log("crearHistoriaClinica - Resultado recibido:", resultado);
+  return resultado;
 }
 
-export async function buscarHistoriaPorRut(rut: string) {
-  return await fetchWithAuth(`/historia-clinica/rut/${rut}`, "GET", null);
+export async function buscarHistoriaPorRut(token: string, rut: string) {
+  console.log("buscarHistoriaPorRut - rut:", rut);
+  const resultado = await fetchWithAuth(`/historia-clinica/rut/${rut}`, "GET", token);
+  console.log("buscarHistoriaPorRut - Resultado recibido:", resultado);
+  return resultado;
 }
 
 export async function obtenerHistoriasClinicas() {
-  return await fetchWithAuth("/historia-clinica", "GET", null);
+  console.log("obtenerHistoriasClinicas");
+  const resultado = await fetchWithAuth("/historia-clinica", "GET", null);
+  console.log("obtenerHistoriasClinicas - Resultado recibido:", resultado);
+  return resultado;
 }
+
 
 // --- EVALUACIONES ---
 export async function crearEvaluacion(
@@ -245,6 +277,8 @@ export async function crearPauta(
     nivelAcademicoSugerido: string;
   }
 ) {
+  console.log("Token para crear pauta:", token);
+  console.log("Headers enviados:", data);
   return await fetchWithAuth("/pauta", "POST", token, data);
 }
 
@@ -293,19 +327,15 @@ export async function obtenerPautaAplicadaPorId(token: string, id: number) {
   return await fetchWithAuth(`/pauta-aplicada/${id}`, "GET", token);
 }
 
-export async function actualizarPautaAplicada(
-  token: string,
-  id: number,
-  data: {
-    finalizada?: boolean;
-  }
-) {
-  return await fetchWithAuth(`/pauta-aplicada/${id}`, "PUT", token, data);
+export async function actualizarPautaAplicada(token: string, id: number, data: { finalizada: boolean }) {
+  return await fetchWithAuth(`/pauta-aplicada/${id}`, "PUT", token, data );
 }
 
 export async function eliminarPautaAplicada(token: string, id: number) {
-  return await fetchWithAuth(`/pauta-aplicada/${id}`, "DELETE", token);
+  return await fetchWithAuth(`/pauta-aplicada/${id}`, "DELETE", null, token);
 }
+
+
 
 // --- PAUTA ITEM CLINICO ---
 export async function obtenerItemsClinicos() {
@@ -391,8 +421,45 @@ export async function crearUsuarioSistema(
     password?: string;
   }
 ) {
+    console.log("crearUsuario - Token:", token);
+    console.log("crearUsuario - Data:", data);
   return await fetchWithAuth("/usersystem", "POST", token, data);
 }
+
+// --- USERS (pacientes) ---
+export async function crearUsuario(
+  token: string,
+  data: {
+    rut: string;
+    nombres: string;
+    apellidoPaterno: string;
+    apellidoMaterno?: string;
+    fechaNacimiento: string; // ISO 8601, ej: "1990-01-01"
+    edad?: string;
+    sexo?: string;
+    estadoCivil?: string;
+    direccion?: string;
+    telefonoPersonal?: string;
+    email?: string;
+    motivo?: string;
+    prevision?: string;
+    [key: string]: any; // Para que acepte otros campos opcionales
+  }
+) {
+  console.log("crearUsuario - Token recibido:", token);
+  console.log("crearUsuario - Data enviada:", data);
+
+  try {
+    const result = await fetchWithAuth("/users", "POST", token, data);
+    console.log("crearUsuario - Respuesta:", result);
+    return result;
+  } catch (error: any) {
+    console.error("crearUsuario - Error al crear usuario:", error.message);
+    throw error; // para que arriba puedan manejar el error
+  }
+}
+
+
 
 export async function actualizarUsuarioSistema(
   token: string,
@@ -407,6 +474,25 @@ export async function actualizarUsuarioSistema(
 ) {
   return await fetchWithAuth(`/usersystem/${id}`, "PUT", token, data);
 }
+
+// --- REGISTRAR PACIENTE (USUARIO SISTEMA, solo admin) ---
+export async function registerPaciente(
+  token: string,
+  data: {
+    email: string;
+    name: string;
+    password: string;
+    rut: string;
+    fechaNacimiento: string; // formato ISO: YYYY-MM-DD
+    role?: "estudiante" | "docente" | "admin"; // para paciente usualmente 'estudiante'
+  }
+) {
+  // Asegura que role sea 'estudiante' si no viene definido
+  if (!data.role) data.role = "estudiante";
+
+  return await fetchWithAuth("/usersystem", "POST", token, data);
+}
+
 
 export async function eliminarUsuarioSistema(token: string, id: number) {
   return await fetchWithAuth(`/usersystem/${id}`, "DELETE", token);
