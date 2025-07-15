@@ -11,6 +11,8 @@ import React, { useState } from "react";
 import { ordenarPorCampo } from "@/utils/sortUtils";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useObtenerPacientes } from "@/hooks/useObtenerPacientes";
+import { router } from "expo-router";
+
 
 export default function HistorialMenu() {
 	const { pacientes, loading, obtenerPacientes } = useObtenerPacientes();
@@ -113,9 +115,12 @@ export default function HistorialMenu() {
 								alignItems: "center",
 							}}
 						>
-							<View style={{ width: 40, alignItems: "center" }}>
+							<TouchableOpacity
+								style={{ width: 40, alignItems: "center" }}
+								onPress={() => router.push(`./FichaPaciente?rut=${item.rut}`)}
+							>
 								<MaterialIcons name="manage-accounts" size={24} color="#007BFF" />
-							</View>
+							</TouchableOpacity>
 							<View style={{ width: 40, alignItems: "center" }}>
 								<MaterialIcons name="person-search" size={24} color="#28A745" />
 							</View>

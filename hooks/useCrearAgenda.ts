@@ -31,7 +31,7 @@ export const useCrearAgenda = () => {
       pacienteNombre,
       edad: edad.toString(),
       documento,
-      nhc: nhc ?? userId.toString(),
+      nhc: nhc ?? userId.toString(),  
       prestacion,
       prevision,
       estadoAgenda: "activa",

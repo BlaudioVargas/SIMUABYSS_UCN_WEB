@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView } from 'react-native';
-import { styles } from '../grafico/grafico';
+import { styles } from '@/styles/grafico';
 import { fetchClientes } from '../api/api';
 import { useLocalSearchParams } from 'expo-router';
 

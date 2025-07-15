@@ -1,25 +1,33 @@
-import { Alert } from "react-native";
 import { useAuth } from "@/components/AuthContext"; 
 
-const urlbackend = "http://localhost/3000"; //poner .env
-
-const camposObligatorios = ["nombres", "edad", "rut", "motivo", "causa"];
+const camposObligatorios = [
+  'nHistoria',
+  'rut',
+  'nombres',
+  'apellidoPaterno',
+  'apellidoMaterno',
+  'fechaNacimiento',
+  'edad',
+  'sexo',
+  'motivo',
+  'prevision',
+];
 
 export const useEnviarPaciente = () => {
-	const { accessToken } = useAuth();
+	const { accessToken} = useAuth();
 
 	const enviarPacienteAlBackend = async (paciente: Record<string, any>) => {
 		if (!accessToken) {
-			Alert.alert("Error", "No hay token disponible. Inicia sesión.");
+			console.error("No hay usuario logeado, inicie sesion")
 			return;
 		}
-
+		/*
 		for (const campo of camposObligatorios) {
 			if (!paciente[campo] || paciente[campo].toString().trim() === "") {
 				Alert.alert("Campo obligatorio", `El campo "${campo}" es obligatorio`);
 				return;
 			}
-		}
+		}*/
 
 		const payload = camposObligatorios.reduce((acc, campo) => {
 			acc[campo] = paciente[campo];
@@ -43,11 +51,9 @@ export const useEnviarPaciente = () => {
 			} 
 
 			const data = await response.json();
-			Alert.alert("Éxito", "Paciente creado correctamente");
 			console.log("Paciente creado:", data);
-		} catch (error: any) {
-			console.error("Error:", error);
-			Alert.alert("Error", "No se pudo guardar el paciente");
+		} catch (err: any) {
+			throw err;
 		}
 	};
 

@@ -6,7 +6,7 @@ import {
   fetchPautasMedicas,
   asignarPautaMedica,
 } from '../api/api';
-import { styles } from '../grafico/grafico';
+import { styles } from '@/styles/grafico';
 import { useLocalSearchParams } from 'expo-router';
 
 type CampoMedico = {

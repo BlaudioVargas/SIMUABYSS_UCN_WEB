@@ -32,12 +32,10 @@ export const useAuth = () => {
 };
 export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
     //quitar los consolelog
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useLocalStorage<User | null>("user", null);
     const [accessToken, setAccessToken] = useLocalStorage<string | null>('accessToken', null);
     const [refreshToken, setRefreshToken] = useLocalStorage<string | null>('refreshToken', null);
     const [loading, setLoading] = useState(true);
-
-    console.log('authprovider testing')
 
     React.useEffect(() => {
 		const restaurarSesion = async () => {
@@ -73,6 +71,7 @@ export const AuthProvider: React.FC<{children: ReactNode}> = ({ children }) => {
         console.log('Authoprovider login exitoso');
         console.log(accessToken);
         console.log(refreshToken);
+        console.log(user);
     }
 
     const logout = async () => {

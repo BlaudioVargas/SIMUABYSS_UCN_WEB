@@ -149,4 +149,3 @@ export const obtenerPautaDeFicha = (...args: Parameters<typeof realFns.obtenerPa
 export const actualizarNotaComentario = (...args: Parameters<typeof realFns.actualizarNotaComentario>) =>
   createApiHandler(realFns.actualizarNotaComentario, apiMock.actualizarNotaComentario).then(fn => fn(...args));
 
-

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Stack } from 'expo-router';
 import { AuthProvider } from '@/components/AuthContext';
+import { PaperProvider } from 'react-native-paper';
 
 const StackLayout = () => {
   return (
@@ -13,9 +14,11 @@ const StackLayout = () => {
 
 export default function RootLayout() {
   return (
-    <AuthProvider>
-      <StackLayout />
-    </AuthProvider>
+    <PaperProvider>
+      <AuthProvider>
+        <StackLayout />
+      </AuthProvider>
+    </PaperProvider>
   )
 };
 

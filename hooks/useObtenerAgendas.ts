@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Alert } from "react-native";
 
 export const useObtenerAgendas = () => {
-  const { accessToken } = useAuth();
+  const { accessToken , user} = useAuth();
   const [agendas, setAgendas] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -17,7 +17,7 @@ export const useObtenerAgendas = () => {
     setLoading(true);
 
     try {
-      const res = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/agenda`, {
+      const res = await fetch(`${process.env.EXPO_PUBLIC_BACKEND_URL}/agenda/estudiante/${user?.userId}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${accessToken}`,
@@ -28,11 +28,7 @@ export const useObtenerAgendas = () => {
 
       const data = await res.json();
 
-      const filtradas = data.filter(
-        (a: any) => a.estadoAgenda === "activa" && a.user // solo las activas con paciente asociado
-      );
-
-      setAgendas(filtradas);
+      setAgendas(data);
     } catch (error) {
       console.error("Error al obtener agendas:", error);
       Alert.alert("Error", "No se pudo cargar la lista de agendas.");

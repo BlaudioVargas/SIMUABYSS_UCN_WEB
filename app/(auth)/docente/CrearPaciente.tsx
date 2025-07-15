@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { StyleSheet, Text, TextInput, View, ScrollView, TouchableOpacity, Platform, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { DatePickerModal } from 'react-native-paper-dates';
-import { Provider as PaperProvider } from 'react-native-paper';
+import AlertDialog from '@/app/components/AlertDialog'
 
 import { camposDatosPersonales, camposDireccion, camposAdministrativos, CampoFormulario } from '@/constants/constantes';
 import { useEnviarPaciente } from '@/src/conexion_back/paciente-api';
+import { calcularEdad } from '@/utils/dateUtils';
 
 const camposObligatorios = new Set([
   'nHistoria',
@@ -28,8 +29,21 @@ export default function CrearPaciente() {
   const [errores, setErrores] = useState<Record<string, boolean>>({});
   const { enviarPacienteAlBackend } = useEnviarPaciente();
 
+  
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [dialogTitulo, setDialogTitulo] = useState('');
+  const [dialogMensaje, setDialogMensaje] = useState('');
+
+
+
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [campoFechaActivo, setCampoFechaActivo] = useState<string | null>(null);
+  
+  const mostrarDialogo = (titulo: string, mensaje: string) => {
+    setDialogTitulo(titulo);
+    setDialogMensaje(mensaje);
+    setDialogVisible(true);
+  };
 
   const handleChange = (key: string, value: string) => {
     setPaciente((prev) => ({ ...prev, [key]: value }));
@@ -60,10 +74,11 @@ export default function CrearPaciente() {
 
     try {
       await enviarPacienteAlBackend(paciente);
-      Alert.alert('Éxito', 'Paciente guardado exitosamente');
+
+      mostrarDialogo('Éxito', 'Paciente guardado exitosamente');
     } catch (error: any) {
-      console.log('Error: ', error);
-      Alert.alert('Error', 'No se pudo guardar el paciente');
+      console.log(error);
+      mostrarDialogo('Error', 'No se pudo guardar al paciente');
     }
   };
 
@@ -168,7 +183,6 @@ export default function CrearPaciente() {
   }
 
   return (
-    <PaperProvider>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.sectionTitle}>Datos Personales</Text>
         {renderTwoColumns(camposDatosPersonales, paciente, handleChange, styles)}
@@ -190,16 +204,28 @@ export default function CrearPaciente() {
             if (campoFechaActivo && date) {
               const fechaFormateada = date.toISOString().slice(0, 10);
               handleChange(campoFechaActivo, fechaFormateada);
+
+              // Si el campo activo es fechaNacimiento, calcular la edad automáticamente
+              if (campoFechaActivo === 'fechaNacimiento') {
+                const edadCalculada = calcularEdad(fechaFormateada);
+                handleChange('edad', edadCalculada);
+              }
+
               setCampoFechaActivo(null);
             }
           }}
-        />
 
+        />
+        <AlertDialog
+          visible={dialogVisible}
+          title={dialogTitulo}
+          message={dialogMensaje}
+          onClose={()=>setDialogVisible(false)}
+        />
         <TouchableOpacity style={styles.boton} onPress={handleImprimirPaciente}>
           <Text style={styles.textoBoton}>Agregar paciente</Text>
         </TouchableOpacity>
       </ScrollView>
-    </PaperProvider>
   );
 }
 
